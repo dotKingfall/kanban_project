@@ -24,8 +24,8 @@ return new class extends Migration
             $table->json('anexos')->nullable();
             $table->boolean('cobrada_do_cliente')->default(false);
             $table->boolean('flag_returned')->default(false);
-            $table->float('tempo_estimado')->default(0);
-            $table->float('tempo_gasto')->default(0);
+            $table->integer('tempo_estimado')->default(0);
+            $table->integer('tempo_gasto')->default(0);
             $table->timestamp('data_cadastro')->useCurrent();
             $table->string('prioridade')->nullable();
             $table->string('setor')->nullable();
