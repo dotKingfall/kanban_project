@@ -1,30 +1,56 @@
-/vendor/
+# ===== Global =====
+# OS / Editor junk
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+*.swp
+*.swo
+*.bak
+
+# Node / PHP dependencies
 node_modules/
-npm-debug.log
-yarn-error.log
+vendor/
 
-# Laravel 4 specific
-bootstrap/compiled.php
-app/storage/
-
-# Laravel 5 & Lumen specific
-public/storage
-public/hot
-
-# Laravel 5 & Lumen specific with changed public path
-public_html/storage
-public_html/hot
-
-storage/*.key
+# Environment & secrets
 .env
-Homestead.yaml
-Homestead.json
-/.vagrant
-.phpunit.result.cache
+.env.*
+*.local
 
-/public/build
-/storage/pail
-.env.backup
-.env.production
-.phpactor.json
-auth.json
+# ===== Frontend (Vue + Quasar) =====
+# Build output
+kanban_frontend/dist/
+kanban_frontend/.quasar/
+kanban_frontend/.cache/
+kanban_frontend/.output/
+
+# IDE / tooling
+kanban_frontend/.idea/
+kanban_frontend/.vscode/
+kanban_frontend/.eslintcache
+
+# ===== Backend (Laravel) =====
+# Laravel specific
+kanban_backend/bootstrap/cache/
+kanban_backend/storage/*.key
+kanban_backend/storage/app/public/
+kanban_backend/storage/framework/cache/*
+kanban_backend/storage/framework/sessions/*
+kanban_backend/storage/framework/views/*
+kanban_backend/storage/logs/*
+
+# Composer artifacts
+kanban_backend/.phpunit.result.cache
+kanban_backend/phpunit.xml
+kanban_backend/.php_cs.cache
+
+# ===== Misc =====
+# Coverage / testing
+coverage/
+kanban_backend/tests/_output/
+kanban_backend/tests/_support/_generated/
+
+# Ignore lock files if you prefer (optional)
+package-lock.json
+yarn.lock
+composer.lock
