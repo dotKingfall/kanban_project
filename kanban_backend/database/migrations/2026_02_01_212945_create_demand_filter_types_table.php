@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('demand_filter_types', function (Blueprint $table) {
             $table->id();
+            $table->string('name');
             $table->timestamps();
         });
     }
