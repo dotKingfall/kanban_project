@@ -13,6 +13,16 @@ return new class extends Migration
     {
         Schema::create('clients', function (Blueprint $table) {
             $table->id();
+            $table->string('nome');
+            $table->string('email')->nullable();
+            $table->string('whatsapp')->nullable();
+            $table->boolean('avisar_por_email')->default(false);
+            $table->boolean('avisar_por_whatsapp')->default(false);
+            $table->text('observacao')->nullable();
+            $table->boolean('reverse_filter')->default(false);
+        
+            // Foreign keys to demand filter types
+            $table->foreignId('global_filter_id')->nullable()->constrained('demand_filter_types')->nullOnDelete();
             $table->timestamps();
         });
     }

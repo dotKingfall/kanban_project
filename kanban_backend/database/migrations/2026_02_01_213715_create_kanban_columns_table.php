@@ -13,6 +13,12 @@ return new class extends Migration
     {
         Schema::create('kanban_columns', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('client_id')->constrained('clients')->onDelete('cascade');
+            $table->string('name');
+            $table->integer('position');
+            $table->boolean('is_fixed')->default(false);
+            $table->boolean('is_hidden')->default(false);
+            $table->boolean('reverse_filter')->default(false);
             $table->timestamps();
         });
     }
