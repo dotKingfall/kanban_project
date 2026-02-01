@@ -8,6 +8,13 @@ Thumbs.db
 *.swo
 *.bak
 
+# ===== VS Code =====
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+!.vscode/tasks.json
+!.vscode/launch.json
+
 # Node / PHP dependencies
 node_modules/
 vendor/
