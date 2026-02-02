@@ -122,7 +122,7 @@ const handleLogout = async () => {
 <style>
 .slide-left-enter-active,
 .slide-left-leave-active {
-  transition: transform 0.3s ease, opacity 0.3s ease;
+  transition: transform 0.15s ease, opacity 0.1s ease;
 }
 
 .slide-left-enter-from {
