@@ -40,23 +40,22 @@
 import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { useRouter } from 'vue-router';
-import { api } from 'boot/axios';
-import type { Client } from 'src/components/models';
-
-// Extend Client interface locally to include demands if not already present in models
-interface ClientWithDemands extends Client {
-  demands?: any[];
-}
+import { useKanbanStore, type ClientWithDemands } from 'src/stores/kanban';
 
 const route = useRoute();
 const router = useRouter();
+const kanbanStore = useKanbanStore();
 const client = ref<ClientWithDemands | null>(null);
 const loading = ref(true);
 
 onMounted(async () => {
   try {
-    const response = await api.get('/clients', { params: { client_id: route.params.clientId } });
-    client.value = response.data;
+    // Ensure we have data. If user refreshed page directly here, this will fetch it.
+    // If coming from Dashboard, this uses the cache immediately.
+    await kanbanStore.fetchClients();
+    
+    const foundClient = kanbanStore.getClientById(route.params.clientId as string);
+    client.value = foundClient || null;
   } catch (error) {
     console.error('Failed to fetch client', error);
   } finally {

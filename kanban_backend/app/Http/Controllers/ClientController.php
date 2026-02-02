@@ -14,7 +14,18 @@ class ClientController extends Controller
             return $this->show($request, $request->input('client_id'));
         }
 
-        return $request->user()->clients;
+        $clients = $request->user()->clients;
+
+        // Eager load demands for all clients to improve frontend performance
+        // We fetch all demands belonging to these clients and group them by client ID
+        $clientIds = $clients->pluck('id');
+        $demands = Demand::whereIn('cliente', $clientIds)->get()->groupBy('cliente');
+
+        foreach ($clients as $client) {
+            $client->setRelation('demands', $demands->get($client->id, []));
+        }
+
+        return $clients;
     }
 
     public function show(Request $request, $id)

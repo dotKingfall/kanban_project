@@ -151,17 +151,19 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { api } from 'boot/axios';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from 'stores/auth';
+import { useKanbanStore } from 'stores/kanban';
 import { useQuasar, type QTableColumn } from 'quasar';
 import type { Client } from 'src/components/models';
 
 const $q = useQuasar();
 const router = useRouter();
 const authStore = useAuthStore();
-const clients = ref<Client[]>([]);
+const kanbanStore = useKanbanStore();
+const clients = computed(() => kanbanStore.clients);
 const loading = ref(false);
 const showEditDialog = ref(false);
 const editingClient = ref<Client>({} as Client);
@@ -182,8 +184,7 @@ const columns: QTableColumn[] = [
 const fetchClients = async () => {
   loading.value = true;
   try {
-    const response = await api.get('/clients');
-    clients.value = response.data;
+    await kanbanStore.fetchClients(true);
   } catch (error) {
     console.error(error);
     $q.notify({ type: 'negative', message: 'Failed to load clients' });
@@ -235,7 +236,7 @@ const saveClient = async () => {
       $q.notify({ type: 'positive', message: 'Client created successfully' });
     }
     showEditDialog.value = false;
-    await fetchClients(); // Refresh the client list
+    await kanbanStore.fetchClients(true);
   } catch (error) {
     console.error(error);
     $q.notify({ type: 'negative', message: 'Failed to save client' });
@@ -255,7 +256,7 @@ const confirmDelete = (client: Client) => {
       // Using destroyMany as per controller definition, passing array of IDs
       await api.delete('/clients', { data: { ids: [client.id] } });
       $q.notify({ type: 'positive', message: 'Client deleted' });
-      fetchClients();
+      await kanbanStore.fetchClients(true);
     } catch (error) {
       console.error(error);
       $q.notify({ type: 'negative', message: 'Failed to delete client' });
@@ -263,5 +264,14 @@ const confirmDelete = (client: Client) => {
   });
 };
 
-onMounted(fetchClients);
+onMounted(async () => {
+  loading.value = true;
+  try {
+    await kanbanStore.fetchClients();
+  } catch (error) {
+    console.error(error);
+  } finally {
+    loading.value = false;
+  }
+});
 </script>
