@@ -17,9 +17,7 @@ export const useAuthStore = defineStore('auth', {
         throw error;
       }
     },
-    async login(payload: any) {
-      // The CSRF cookie handshake is handled in the component for now
-      // We just perform the login request here
+    async login(payload: { email: string; password: string }) {
       await api.post('/login', payload);
       await this.fetchUser();
     },
