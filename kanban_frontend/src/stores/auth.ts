@@ -18,12 +18,28 @@ export const useAuthStore = defineStore('auth', {
       }
     },
     async login(payload: { email: string; password: string }) {
-      await api.post('/login', payload);
-      await this.fetchUser();
+      try {
+        const response = await api.post('/login', payload);
+
+        // 2. If successful, update state and fetch user data
+        if (response.status === 200 || response.status === 204) {
+          localStorage.setItem('is_logged_in', 'true');
+          return await this.fetchUser();
+        }
+      } catch (error) {
+        this.user = null;
+        localStorage.removeItem('is_logged_in');
+        throw error; 
+      }
     },
     async logout() {
-      await api.post('/logout');
-      this.user = null;
+      try {
+        await api.post('/logout');
+      } finally {
+
+        this.user = null;
+        localStorage.removeItem('is_logged_in');
+      }
     }
   }
 });

@@ -38,7 +38,7 @@
         <q-separator class="q-my-sm" />
 
         <!-- Navigation -->
-        <q-item clickable v-ripple to="/" exact active-class="text-primary bg-blue-1">
+        <q-item clickable v-ripple to="/dashboard" active-class="text-primary bg-blue-1">
           <q-item-section avatar>
             <LayoutDashboard />
           </q-item-section>
@@ -107,7 +107,7 @@ const handleLogout = async () => {
   } catch (error) {
     console.error('Logout failed', error);
   } finally {
-    await router.push('/login');
+    await router.push('/');
   }
 };
 </script>

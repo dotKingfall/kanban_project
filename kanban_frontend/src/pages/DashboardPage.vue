@@ -11,26 +11,12 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted } from 'vue';
+import { computed } from 'vue';
 import { useAuthStore } from 'stores/auth';
-import { useRouter } from 'vue-router';
 import ClientsTable from 'src/components/ClientsTable.vue';
 
 const authStore = useAuthStore();
-const router = useRouter();
 const user = computed(() => authStore.user);
-
-
-onMounted(async () => {
-  // If user is not loaded, try to fetch. If fetch fails, redirect to login.
-  if (!user.value) {
-    try {
-      await authStore.fetchUser();
-    } catch {
-      await router.push('/login');
-    }
-  }
-});
 </script>
 
 <style lang="scss">

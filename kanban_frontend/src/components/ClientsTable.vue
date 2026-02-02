@@ -19,6 +19,16 @@
         >
           <q-tooltip>Refresh</q-tooltip>
         </q-btn>
+
+        <q-btn
+          flat
+          round
+          color="primary"
+          icon="add"
+          @click="openCreateDialog"
+        >
+          <q-tooltip>Create new</q-tooltip>
+        </q-btn>
       </template>
 
       <template v-slot:body-cell-avisar_por_email="props">
@@ -49,7 +59,7 @@
     <q-dialog v-model="showEditDialog">
       <q-card style="min-width: 500px">
         <q-card-section>
-          <div class="text-h6">Edit Client</div>
+          <div class="text-h6">{{ editingClient.id ? 'Edit Client' : 'New Client' }}</div>
         </q-card-section>
 
         <q-card-section class="q-pt-none">
@@ -103,10 +113,12 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { api } from 'boot/axios';
+import { useAuthStore } from 'stores/auth';
 import { useQuasar, type QTableColumn } from 'quasar';
 import type { Client } from 'src/components/models';
 
 const $q = useQuasar();
+const authStore = useAuthStore();
 const clients = ref<Client[]>([]);
 const loading = ref(false);
 const showEditDialog = ref(false);
@@ -136,6 +148,21 @@ const fetchClients = async () => {
   }
 };
 
+const openCreateDialog = () => {
+  editingClient.value = {
+    id: 0,
+    nome: '',
+    email: '',
+    whatsapp: '',
+    observacao: '',
+    avisar_por_email: false,
+    avisar_por_whatsapp: false,
+    reverse_filter: false,
+    user_id: authStore.user?.id || 0,
+  } as Client;
+  showEditDialog.value = true;
+};
+
 const openEditDialog = (client: Client) => {
   editingClient.value = { ...client };
   showEditDialog.value = true;
@@ -146,13 +173,18 @@ const saveClient = async () => {
   isSaving.value = true;
 
   try {
-    await api.put(`/clients/${editingClient.value.id}`, editingClient.value);
-    $q.notify({ type: 'positive', message: 'Client updated successfully' });
+    if (editingClient.value.id) {
+      await api.put(`/clients/${editingClient.value.id}`, editingClient.value);
+      $q.notify({ type: 'positive', message: 'Client updated successfully' });
+    } else {
+      await api.post('/clients', editingClient.value);
+      $q.notify({ type: 'positive', message: 'Client created successfully' });
+    }
     showEditDialog.value = false;
     await fetchClients(); // Refresh the client list
   } catch (error) {
     console.error(error);
-    $q.notify({ type: 'negative', message: 'Failed to update client' });
+    $q.notify({ type: 'negative', message: 'Failed to save client' });
   } finally {
     isSaving.value = false; // Reset the saving state
   }
@@ -167,7 +199,7 @@ const confirmDelete = (client: Client) => {
   }).onOk(async () => {
     try {
       // Using destroyMany as per controller definition, passing array of IDs
-      await api.post('/clients/destroy-many', { ids: [client.id] });
+      await api.delete('/clients', { data: { ids: [client.id] } });
       $q.notify({ type: 'positive', message: 'Client deleted' });
       fetchClients();
     } catch (error) {

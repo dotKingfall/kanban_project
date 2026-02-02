@@ -33,17 +33,14 @@ const router = useRouter();
 const authStore = useAuthStore();
 
 onMounted(async () => {
-  try {
-    await authStore.fetchUser();
-    if (authStore.user) {
-      await router.push('/');
-    }
-  } catch (error) {
-    console.error('Failed to fetch user:', error);
+  if (localStorage.getItem('is_logged_in') === 'true' && authStore.user) {
+    await router.push('/dashboard');
   }
+
 });
 
 const handleLogin = async () => {
+   if (!email.value || !password.value) return;
   loading.value = true;
   try {
     // 1. Get CSRF Cookie (Must be done before login)
@@ -63,7 +60,7 @@ const handleLogin = async () => {
     await authStore.login({ email: email.value, password: password.value });
 
     // 3. Redirect on success
-    await router.push('/');
+    await router.push('/dashboard');
   } catch (error) {
     console.error('Login failed:', error);
   } finally {
