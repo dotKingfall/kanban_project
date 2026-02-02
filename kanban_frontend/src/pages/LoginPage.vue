@@ -18,15 +18,28 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { api } from 'boot/axios';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
+import { useAuthStore } from 'stores/auth';
+
+// TODO SPINNER LOGGIN OFF AND CHECK AUTH SPEED
 
 const email = ref('');
 const password = ref('');
 const loading = ref(false);
 const router = useRouter();
+const authStore = useAuthStore();
+
+onMounted(async () => {
+  try {
+    await authStore.fetchUser();
+    if (authStore.user) {
+      router.push('/');
+    }
+  } catch {}
+});
 
 const handleLogin = async () => {
   loading.value = true;
@@ -45,10 +58,7 @@ const handleLogin = async () => {
     }
 
     // 2. Attempt Login
-    await api.post('/login', {
-      email: email.value,
-      password: password.value
-    });
+    await authStore.login({ email: email.value, password: password.value });
 
     // 3. Redirect on success
     await router.push('/');

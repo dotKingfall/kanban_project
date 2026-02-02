@@ -22,6 +22,16 @@ const api = axios.create({
   },
 });
 
+// Add a request interceptor to attach the CSRF token from the cookie
+// This ensures the header is present even after a page refresh
+api.interceptors.request.use((config) => {
+  const tokenMatch = document.cookie.match(/XSRF-TOKEN=([^;]+)/);
+  if (tokenMatch && tokenMatch[1]) {
+    config.headers['X-XSRF-TOKEN'] = decodeURIComponent(tokenMatch[1]);
+  }
+  return config;
+});
+
 export default boot(({ app }) => {
   // for use inside Vue files (Options API) through this.$axios and this.$api
 
