@@ -1,15 +1,7 @@
 <template>
   <q-page class="flex flex-center column q-gutter-md">
     <div v-if="user" class="text-center">
-      <h4 class="q-mb-sm">Welcome, {{ user.first_name }} {{ user.last_name }}</h4>
-      <div class="text-subtitle1 q-mb-md">Email: {{ user.email }}</div>
-      
-      <q-btn 
-        color="negative" 
-        label="Logout" 
-        @click="handleLogout" 
-        icon="logout"
-      />
+      Clients page
     </div>
     <div v-else>
       <q-spinner size="3em" color="primary" />
