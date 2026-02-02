@@ -42,12 +42,43 @@
           <q-item-section avatar>
             <LayoutDashboard />
           </q-item-section>
+
           <q-item-section>
-            Dashboard
+            Clientes
             <!-- Small label below icon in mini mode is tricky in standard Quasar, 
                  standard behavior is hiding text. We use tooltip for mini mode UX -->
             <q-tooltip v-if="uiStore.isSidebarMini" anchor="center right" self="center left" :offset="[10, 10]">
-              Dashboard
+              Clientes
+            </q-tooltip>
+          </q-item-section>
+        </q-item>
+
+        <q-item clickable v-ripple to="/" active-class="text-primary bg-blue-1">
+          <q-item-section avatar>
+            <LayoutDashboard />
+          </q-item-section>
+
+          <q-item-section>
+            Todas as Demandas
+            <!-- Small label below icon in mini mode is tricky in standard Quasar, 
+                 standard behavior is hiding text. We use tooltip for mini mode UX -->
+            <q-tooltip v-if="uiStore.isSidebarMini" anchor="center right" self="center left" :offset="[10, 10]">
+              Todas as Demandas
+            </q-tooltip>
+          </q-item-section>
+        </q-item>
+
+        <q-item clickable v-ripple to="/" active-class="text-primary bg-blue-1">
+          <q-item-section avatar>
+            <LayoutDashboard />
+          </q-item-section>
+
+          <q-item-section>
+            Relatórios
+            <!-- Small label below icon in mini mode is tricky in standard Quasar, 
+                 standard behavior is hiding text. We use tooltip for mini mode UX -->
+            <q-tooltip v-if="uiStore.isSidebarMini" anchor="center right" self="center left" :offset="[10, 10]">
+              Relatórios
             </q-tooltip>
           </q-item-section>
         </q-item>

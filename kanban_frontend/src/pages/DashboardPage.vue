@@ -29,15 +29,4 @@ onMounted(async () => {
     }
   }
 });
-
-const handleLogout = async () => {
-  try {
-    await authStore.logout();
-  } catch (error) {
-    console.error('Logout failed:', error);
-  } finally {
-    // Always redirect to login, even if the API call failed
-    await router.push('/login');
-  }
-};
 </script>
