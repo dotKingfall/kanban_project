@@ -6,8 +6,10 @@
       :columns="columns"
       row-key="id"
       :loading="loading"
+      :rows-per-page-options="[0]"
       flat
       bordered
+      @row-click="onRowClick"
     >
       <template v-slot:top-right>
         <q-btn
@@ -31,8 +33,8 @@
         </q-btn>
       </template>
 
-      <template v-slot:body-cell-observacao="props">
-        <q-td :props="props" style="max-width: 200px; cursor: pointer" @click="openObservationDialog(props.value)">
+      <template #body-cell-observacao="props">
+        <q-td :props="props" style="max-width: 200px; cursor: pointer" @click.stop="openObservationDialog(props.value)">
           <div class="ellipsis">
             {{ props.value }}
           </div>
@@ -54,10 +56,10 @@
 
       <template v-slot:body-cell-actions="props">
         <q-td :props="props" align="right">
-          <q-btn flat round color="primary" icon="edit" size="sm" @click="openEditDialog(props.row)">
+          <q-btn flat round color="primary" icon="edit" size="sm" @click.stop="openEditDialog(props.row)">
             <q-tooltip>Edit</q-tooltip>
           </q-btn>
-          <q-btn flat round color="negative" icon="delete" size="sm" @click="confirmDelete(props.row)">
+          <q-btn flat round color="negative" icon="delete" size="sm" @click.stop="confirmDelete(props.row)">
             <q-tooltip>Delete</q-tooltip>
           </q-btn>
         </q-td>
@@ -109,7 +111,7 @@
               type="textarea"
               outlined
               dense
-              autogrow
+              height="150px"
             />
 
             <div class="row q-col-gutter-md">
@@ -151,11 +153,13 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { api } from 'boot/axios';
+import { useRouter } from 'vue-router';
 import { useAuthStore } from 'stores/auth';
 import { useQuasar, type QTableColumn } from 'quasar';
 import type { Client } from 'src/components/models';
 
 const $q = useQuasar();
+const router = useRouter();
 const authStore = useAuthStore();
 const clients = ref<Client[]>([]);
 const loading = ref(false);
@@ -186,6 +190,10 @@ const fetchClients = async () => {
   } finally {
     loading.value = false;
   }
+};
+
+const onRowClick = (evt: Event, row: Client) => {
+  router.push(`/kanban/${row.id}`);
 };
 
 const openCreateDialog = () => {

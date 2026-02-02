@@ -3,13 +3,28 @@
 namespace App\Http\Controllers;
 
 use App\Models\Client;
+use App\Models\Demand;
 use Illuminate\Http\Request;
 
 class ClientController extends Controller
 {
     public function index(Request $request)
     {
+        if ($request->has('client_id')) {
+            return $this->show($request, $request->input('client_id'));
+        }
+
         return $request->user()->clients;
+    }
+
+    public function show(Request $request, $id)
+    {
+        $client = $request->user()->clients()->findOrFail($id);
+        // Fetch demands associated with this client
+        $demands = Demand::where('cliente', $id)->get();
+        $client->setRelation('demands', $demands);
+        
+        return response()->json($client);
     }
 
     public function store(Request $request)
