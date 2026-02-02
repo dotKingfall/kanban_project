@@ -74,10 +74,23 @@
             
             <div class="row q-col-gutter-sm">
               <div class="col-12 col-md-6">
-                <q-input v-model="editingClient.email" label="Email" type="email" outlined dense />
+                <q-input 
+                  v-model="editingClient.email" 
+                  label="Email" 
+                  type="email" 
+                  outlined 
+                  dense 
+                  :rules="[val => !!val || !!editingClient.whatsapp || 'At least one contact method is required']"
+                />
               </div>
               <div class="col-12 col-md-6">
-                <q-input v-model="editingClient.whatsapp" label="WhatsApp" outlined dense />
+                <q-input 
+                  v-model="editingClient.whatsapp" 
+                  label="WhatsApp" 
+                  outlined 
+                  dense 
+                  :rules="[val => !!val || !!editingClient.email || 'At least one contact method is required']"
+                />
               </div>
             </div>
 

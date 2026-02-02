@@ -16,8 +16,8 @@ class ClientController extends Controller
     {
         $validated = $request->validate([
             'nome' => 'required|string|max:255',
-            'email' => 'nullable|email',
-            'whatsapp' => 'nullable|string',
+            'email' => 'nullable|email|required_without:whatsapp',
+            'whatsapp' => 'nullable|string|required_without:email',
             'avisar_por_email' => 'boolean',
             'avisar_por_whatsapp' => 'boolean',
             'observacao' => 'nullable|string',
@@ -33,7 +33,19 @@ class ClientController extends Controller
     public function update(Request $request, $id)
     {
         $client = Client::findOrFail($id);
-        $client->update($request->all());
+
+        $validated = $request->validate([
+            'nome' => 'sometimes|required|string|max:255',
+            'email' => 'nullable|email|required_without:whatsapp',
+            'whatsapp' => 'nullable|string|required_without:email',
+            'avisar_por_email' => 'boolean',
+            'avisar_por_whatsapp' => 'boolean',
+            'observacao' => 'nullable|string',
+            'reverse_filter' => 'boolean',
+            'global_filter_id' => 'nullable|exists:demand_filter_types,id',
+        ]);
+
+        $client->update($validated);
         return response()->json($client);
     }
 
