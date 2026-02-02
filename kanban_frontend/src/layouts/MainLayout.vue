@@ -53,9 +53,9 @@
           </q-item-section>
         </q-item>
 
-        <q-item clickable v-ripple to="/" active-class="text-primary bg-blue-1">
+        <q-item clickable v-ripple to="/all-demands" active-class="text-primary bg-blue-1">
           <q-item-section avatar>
-            <LayoutDashboard />
+            <MessageCircleWarning />
           </q-item-section>
 
           <q-item-section>
@@ -68,9 +68,9 @@
           </q-item-section>
         </q-item>
 
-        <q-item clickable v-ripple to="/" active-class="text-primary bg-blue-1">
+        <q-item clickable v-ripple to="/reports" active-class="text-primary bg-blue-1">
           <q-item-section avatar>
-            <LayoutDashboard />
+            <Mail />
           </q-item-section>
 
           <q-item-section>
@@ -95,7 +95,7 @@
 import { useAuthStore } from 'stores/auth';
 import { useUiStore } from 'stores/ui';
 import { useRouter } from 'vue-router';
-import { LogOut, ChevronLeft, ChevronRight, LayoutDashboard } from 'lucide-vue-next';
+import { LogOut, ChevronLeft, ChevronRight, LayoutDashboard, Mail, MessageCircleWarning } from 'lucide-vue-next';
 
 const authStore = useAuthStore();
 const uiStore = useUiStore();
