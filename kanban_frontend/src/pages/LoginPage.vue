@@ -54,11 +54,7 @@ const handleLogin = async () => {
     await router.push('/');
   } catch (error: any) {
     console.error('Login failed:', error);
-    if (error.response && error.response.status === 419) {
-      alert('CSRF Error (419). Please clear browser cookies and check SESSION_DRIVER/SESSION_SECURE_COOKIE in backend .env.');
-    } else {
-      alert('Login failed. Check console for details.');
-    }
+    alert('Login failed: ' + (error.response?.data?.message || error.message));
   } finally {
     loading.value = false;
   }
