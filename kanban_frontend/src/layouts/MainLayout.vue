@@ -32,13 +32,13 @@
           <q-item-section avatar>
             <component :is="uiStore.isSidebarMini ? ChevronRight : ChevronLeft" />
           </q-item-section>
-          <q-item-section>Collapse Sidebar</q-item-section>
+          <q-item-section>Retrair</q-item-section>
         </q-item>
 
         <q-separator class="q-my-sm" />
 
         <!-- Navigation -->
-        <q-item clickable v-ripple to="/" active-class="text-primary bg-blue-1">
+        <q-item clickable v-ripple to="/" exact active-class="text-primary bg-blue-1">
           <q-item-section avatar>
             <LayoutDashboard />
           </q-item-section>
