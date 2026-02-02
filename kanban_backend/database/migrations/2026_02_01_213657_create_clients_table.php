@@ -21,8 +21,9 @@ return new class extends Migration
             $table->text('observacao')->nullable();
             $table->boolean('reverse_filter')->default(false);
         
-            // Foreign keys to demand filter types
+            // Foreign keys to demand filter types and user id
             $table->foreignId('global_filter_id')->nullable()->constrained('demand_filter_types')->nullOnDelete();
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->timestamps();
         });
     }

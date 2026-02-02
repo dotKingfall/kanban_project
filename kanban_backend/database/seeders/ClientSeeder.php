@@ -7,6 +7,7 @@ use App\Models\Demand;
 use App\Models\Department;
 use App\Models\KanbanColumn;
 use App\Models\Priority;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 
 class ClientSeeder extends Seeder
@@ -15,6 +16,7 @@ class ClientSeeder extends Seeder
     {
         $priorities = Priority::all();
         $departments = Department::all();
+        $users = User::all();
 
         // Create 40 clients (20 for each of the 2 users)
         for ($i = 0; $i < 40; $i++) {
@@ -25,6 +27,7 @@ class ClientSeeder extends Seeder
                 'observacao' => rand(0, 1) ? fake()->paragraph() : null,
                 'avisar_por_email' => rand(0, 1),
                 'avisar_por_whatsapp' => rand(0, 1),
+                'user_id' => $i < 20 ? $users[0]->id : $users[1]->id,
             ]);
 
             // Create Kanban Columns for this client

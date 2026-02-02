@@ -18,6 +18,7 @@ class Client extends Model
         'observacao',
         'reverse_filter',
         'global_filter_id',
+        'user_id',
     ];
 
     protected $casts = [

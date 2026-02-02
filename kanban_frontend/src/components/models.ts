@@ -53,6 +53,7 @@ export interface Client {
   created_at?: string;
   updated_at?: string;
   global_filter?: DemandFilterType;
+  user_id: number;
 }
 
 export interface KanbanColumn {
@@ -118,6 +119,7 @@ export function makeEmptyClient(): Omit<Client, 'id' | 'created_at' | 'updated_a
     observacao: '',
     reverse_filter: false,
     global_filter_id: null,
+    user_id: 0,
   };
 }
 
