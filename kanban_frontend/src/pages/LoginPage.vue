@@ -36,9 +36,11 @@ onMounted(async () => {
   try {
     await authStore.fetchUser();
     if (authStore.user) {
-      router.push('/');
+      await router.push('/');
     }
-  } catch {}
+  } catch (error) {
+    console.error('Failed to fetch user:', error);
+  }
 });
 
 const handleLogin = async () => {
@@ -62,9 +64,8 @@ const handleLogin = async () => {
 
     // 3. Redirect on success
     await router.push('/');
-  } catch (error: any) {
+  } catch (error) {
     console.error('Login failed:', error);
-    alert('Login failed: ' + (error.response?.data?.message || error.message));
   } finally {
     loading.value = false;
   }

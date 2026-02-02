@@ -33,7 +33,7 @@ onMounted(async () => {
     try {
       await authStore.fetchUser();
     } catch {
-      router.push('/login');
+      await router.push('/login');
     }
   }
 });
@@ -45,7 +45,7 @@ const handleLogout = async () => {
     console.error('Logout failed:', error);
   } finally {
     // Always redirect to login, even if the API call failed
-    router.push('/login');
+    await router.push('/login');
   }
 };
 </script>
