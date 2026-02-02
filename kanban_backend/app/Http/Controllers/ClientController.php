@@ -7,9 +7,9 @@ use Illuminate\Http\Request;
 
 class ClientController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        return Client::all();
+        return $request->user()->clients;
     }
 
     public function store(Request $request)
@@ -23,6 +23,7 @@ class ClientController extends Controller
             'observacao' => 'nullable|string',
             'reverse_filter' => 'boolean',
             'global_filter_id' => 'nullable|exists:demand_filter_types,id',
+            'user_id' => 'required|exists:users,id',
         ]);
 
         $client = Client::create($validated);
