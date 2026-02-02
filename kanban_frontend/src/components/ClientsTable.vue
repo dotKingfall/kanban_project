@@ -31,6 +31,15 @@
         </q-btn>
       </template>
 
+      <template v-slot:body-cell-observacao="props">
+        <q-td :props="props" style="max-width: 200px; cursor: pointer" @click="openObservationDialog(props.value)">
+          <div class="ellipsis">
+            {{ props.value }}
+          </div>
+          <q-tooltip v-if="props.value">Click to view full observation</q-tooltip>
+        </q-td>
+      </template>
+
       <template v-slot:body-cell-avisar_por_email="props">
         <q-td :props="props">
           <q-icon :name="props.value ? 'check_circle' : 'cancel'" :color="props.value ? 'positive' : 'grey'" size="sm" />
@@ -120,6 +129,22 @@
         </q-card-section>
       </q-card>
     </q-dialog>
+
+    <!-- Observation View Dialog -->
+    <q-dialog v-model="showObservationDialog">
+      <q-card style="min-width: 400px">
+        <q-card-section>
+          <div class="text-h6">Observation</div>
+        </q-card-section>
+
+        <q-card-section class="q-pt-none" style="white-space: pre-wrap;">
+          {{ selectedObservation }}
+        </q-card-section>
+        <q-card-actions align="right">
+          <q-btn flat label="Close" color="primary" v-close-popup />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
   </div>
 </template>
 
@@ -137,11 +162,13 @@ const loading = ref(false);
 const showEditDialog = ref(false);
 const editingClient = ref<Client>({} as Client);
 const isSaving = ref(false);
+const showObservationDialog = ref(false);
+const selectedObservation = ref('');
 
 const columns: QTableColumn[] = [
-  { name: 'id', label: 'ID', field: 'id', sortable: true, align: 'left' },
   { name: 'nome', label: 'Name', field: 'nome', sortable: true, align: 'left' },
   { name: 'email', label: 'Email', field: 'email', sortable: true, align: 'left' },
+  { name: 'observacao', label: 'Observation', field: 'observacao', align: 'left' },
   { name: 'whatsapp', label: 'WhatsApp', field: 'whatsapp', align: 'left' },
   { name: 'avisar_por_email', label: 'Email Notify', field: 'avisar_por_email', align: 'center' },
   { name: 'avisar_por_whatsapp', label: 'WA Notify', field: 'avisar_por_whatsapp', align: 'center' },
@@ -174,6 +201,12 @@ const openCreateDialog = () => {
     user_id: authStore.user?.id || 0,
   } as Client;
   showEditDialog.value = true;
+};
+
+const openObservationDialog = (text: string) => {
+  if (!text) return;
+  selectedObservation.value = text;
+  showObservationDialog.value = true;
 };
 
 const openEditDialog = (client: Client) => {
