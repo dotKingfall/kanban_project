@@ -14,13 +14,17 @@ class AuthController extends Controller
             'password' => ['required'],
         ]);
 
-        if (Auth::attempt($credentials)) {
-            $request->session()->regenerate();
+        try {
+            if (Auth::attempt($credentials)) {
+                $request->session()->regenerate();
 
-            return response()->json([
-                'user' => Auth::user(),
-                'message' => 'Logged in successfully'
-            ]);
+                return response()->json([
+                    'user' => Auth::user(),
+                    'message' => 'Logged in successfully'
+                ]);
+            }
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Login failed: ' . $e->getMessage()], 500);
         }
 
         return response()->json([
