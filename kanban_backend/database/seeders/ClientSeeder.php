@@ -40,8 +40,14 @@ class ClientSeeder extends Seeder
                     'client_id' => $client->id,
                     'name' => $name,
                     'position' => $index,
-                    'is_fixed' => true, // Assuming default columns are fixed
+                    'is_fixed' => false,
                 ]);
+            }
+
+            // Initialize position counters for each column to avoid collisions
+            $columnPositions = [];
+            foreach ($createdColumns as $col) {
+                $columnPositions[$col->id] = 0;
             }
 
             // Create 50 Demands for this client
@@ -50,6 +56,13 @@ class ClientSeeder extends Seeder
                 $column = $createdColumns[array_rand($createdColumns)];
                 $priority = $priorities->random();
                 $department = $departments->random();
+
+                // Generate 1 to 6 random names for testers
+                $testerCount = rand(1, 6);
+                $testers = [];
+                for ($t = 0; $t < $testerCount; $t++) {
+                    $testers[] = fake()->firstName();
+                }
 
                 Demand::create([
                     'cliente' => $client->id,
@@ -66,10 +79,10 @@ class ClientSeeder extends Seeder
                     'titulo' => fake()->sentence(4),
                     'descricao_detalhada' => fake()->paragraph(),
                     'responsavel' => fake()->name(),
-                    'quem_deve_testar' => fake()->firstName(),
+                    'quem_deve_testar' => implode(', ', $testers),
                     'tempo_estimado' => rand(1, 100),
                     'tempo_gasto' => rand(0, 100),
-                    'position_in_column' => rand(0, 10),
+                    'position_in_column' => $columnPositions[$column->id]++,
                     'cobrada_do_cliente' => (bool)rand(0, 1),
                     'flag_returned' => (bool)rand(0, 1),
                 ]);
