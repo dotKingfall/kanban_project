@@ -97,8 +97,13 @@ export default defineConfig((ctx) => {
 
     // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#devserver
     devServer: {
-      // https: true,
+      https: false,
+      port: 9000,
       open: true, // opens browser window automatically
+
+      watch: {
+        usePolling: true,
+      }
     },
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#framework
