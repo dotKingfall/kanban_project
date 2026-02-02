@@ -52,8 +52,6 @@ export interface Client {
   global_filter_id?: number | null;
   created_at?: string;
   updated_at?: string;
-
-  // Relations
   global_filter?: DemandFilterType;
 }
 
@@ -69,6 +67,12 @@ export interface KanbanColumn {
   updated_at?: string;
 }
 
+export interface Attachment {
+  name: string;
+  url: string;
+  type?: string;
+}
+
 export interface Demand {
   id: number;
   cliente: number; // Foreign Key to Client
@@ -77,7 +81,7 @@ export interface Demand {
   descricao_detalhada?: string | null;
   responsavel?: string | null;
   quem_deve_testar?: string | null;
-  anexos?: any | null; // JSON field
+  anexos?: Attachment[] | null; // JSON field
   cobrada_do_cliente: boolean;
   flag_returned: boolean;
   tempo_estimado: number;
