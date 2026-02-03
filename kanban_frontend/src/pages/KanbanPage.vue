@@ -22,55 +22,12 @@
         @end="saveColumns"
       >
         <template #item="{ element: col }">
-          <div
-          class="kanban-column column no-wrap rounded-borders"
-          :class="{ 'is-hidden': col.is_hidden, 'bg-grey-2': !col.is_hidden, 'bg-grey-3': col.is_hidden }"
-          >
-          <!-- Column Header -->
-          <div
-            class="column-header row items-center justify-between q-pa-sm bg-grey-3 rounded-borders"
-            :class="{ 'cursor-move': !col.is_fixed }"
-          >
-            <div class="row items-center no-wrap full-width" :class="{ 'column justify-center q-py-md': col.is_hidden }">
-              
-              <!-- Title -->
-              <div class="text-subtitle1 text-weight-bold ellipsis" :class="{ 'vertical-text': col.is_hidden }">
-                {{ col.name }}
-              </div>
-
-              <q-space v-if="!col.is_hidden" />
-
-              <!-- Actions -->
-              <div class="row no-wrap items-center" :class="{ 'column q-gutter-y-sm q-mt-sm': col.is_hidden }">
-                <q-btn
-                  flat round dense size="sm"
-                  :icon="col.is_fixed ? 'push_pin' : 'o_push_pin'"
-                  :color="col.is_fixed ? 'primary' : 'grey-7'"
-                  @click="togglePin(col)"
-                >
-                  <q-tooltip>{{ col.is_fixed ? 'Unpin' : 'Pin' }}</q-tooltip>
-                </q-btn>
-
-                <q-btn
-                  flat round dense size="sm"
-                  :icon="col.is_hidden ? 'visibility_off' : 'visibility'"
-                  :color="col.is_hidden ? 'negative' : 'grey-7'"
-                  @click="toggleHide(col)"
-                >
-                  <q-tooltip>{{ col.is_hidden ? 'Show' : 'Hide' }}</q-tooltip>
-                </q-btn>
-              </div>
-            </div>
-          </div>
-
-          <!-- Column Content (Placeholder for now) -->
-          <div v-if="!col.is_hidden" class="col q-pa-sm scroll-y relative-position">
-            <!-- Demands will go here later -->
-            <div class="absolute-center text-grey-5 text-center">
-              Empty
-            </div>
-          </div>
-        </div>
+          <kanban-column-component
+            :column="col"
+            :demands="getDemandsForColumn(col.id)"
+            @toggle-pin="togglePin"
+            @toggle-hide="toggleHide"
+          />
         </template>
       </draggable>
     </div>
@@ -89,7 +46,8 @@ import { api } from 'boot/axios';
 import { useQuasar } from 'quasar';
 import draggable from 'vuedraggable';
 import { useKanbanStore, type ClientWithDemands } from 'src/stores/kanban';
-import type { KanbanColumn } from 'src/components/models';
+import type { KanbanColumn, Demand } from 'src/components/models';
+import KanbanColumnComponent from 'src/components/KanbanColumn.vue';
 
 const $q = useQuasar();
 const route = useRoute();
@@ -118,6 +76,11 @@ onMounted(async () => {
     loading.value = false;
   }
 });
+
+const getDemandsForColumn = (columnId: number): Demand[] => {
+  if (!client.value || !client.value.demands) return [];
+  return client.value.demands.filter(d => d.column_id === columnId);
+};
 
 const saveColumns = async () => {
   try {
@@ -158,21 +121,6 @@ const toggleHide = async (col: KanbanColumn) => {
 </script>
 
 <style scoped>
-.kanban-column {
-  width: 300px;
-  min-width: 300px;
-  height: 95%;
-  transition: all 0.3s ease;
-}
-.kanban-column.is-hidden {
-  width: 50px;
-  min-width: 50px;
-}
-.vertical-text {
-  writing-mode: vertical-rl;
-  transform: rotate(180deg);
-  white-space: nowrap;
-}
 .scroll-x-auto {
   overflow-x: auto;
 }
