@@ -105,7 +105,7 @@ class ClientController extends Controller
 
         // Fetch ONLY demands created in that specific month/year
         $demands = Demand::whereIn('cliente', $clientIds)
-            ->whereRaw("to_char(created_at, 'YYYY-MM') = ?", [$month])
+            ->whereRaw("to_char(data_cadastro, 'YYYY-MM') = ?", [$month])
             ->get();
 
         $stats = [
