@@ -6,7 +6,7 @@
       <q-space />
 
       <q-select
-        v-model="selectedYear"
+        v-model="reportStore.selectedYear"
         :options="yearOptions"
         label="Year"
         outlined
@@ -15,7 +15,7 @@
       />
 
       <q-select
-        v-model="selectedMonth"
+        v-model="reportStore.selectedMonth"
         :options="monthOptions"
         label="Month"
         outlined
@@ -64,20 +64,17 @@ import ClientSearchBar from 'src/components/ClientSearchBar.vue';
 import type { QTableColumn } from 'quasar';
 import type { Client } from 'src/components/models';
 import { useRouter } from 'vue-router';
+import { useReportStore } from 'stores/report';
 
 const router = useRouter();
+const reportStore = useReportStore();
 
 const kanbanStore = useKanbanStore();
 const loading = ref(false);
 const search = ref('');
 const searchType = ref('nome');
 
-// --- Date Filter Logic ---
 const currentYear = new Date().getFullYear();
-const selectedYear = ref(currentYear);
-const selectedMonth = ref(new Date().getMonth() + 1);
-
-// Generate past 100 years
 const yearOptions = Array.from({ length: 101 }, (_, i) => currentYear - i);
 
 const monthOptions = [
@@ -114,13 +111,12 @@ const filteredClients = computed(() => {
 });
 
 const onRowClick = async (evt: Event, row: Client) => {
-  const formattedMonth = `${selectedYear.value}-${String(selectedMonth.value).padStart(2, '0')}`;
 
   await router.push({
     path: '/full-reports',
     query: { 
       ids: [row.id], 
-      month: formattedMonth 
+      month: reportStore.formattedMonth 
     }
   });
 
