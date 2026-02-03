@@ -2,7 +2,7 @@
   <q-page class="q-pa-md column no-wrap overflow-hidden bg-white" id="printable-area">
     <div class="row items-center q-mb-md no-print">
       <q-btn flat round icon="arrow_back" color="primary" @click="router.back()" />
-      <div class="text-h5 q-ml-sm">Demand Report: {{ reportStore.formattedMonth }}</div>
+      <div class="text-h5 q-ml-sm">Demand Report: {{ displayDate }}</div>
       <q-space />
       <q-btn color="primary" icon="print" label="Print PDF" @click="printPDF" />
     </div>
@@ -107,6 +107,13 @@ const columns: QTableColumn[] = [
   { name: 'tempo_gasto', label: 'Spent Time (h)', field: 'tempo_gasto', align: 'right', sortable: true },
 ];
 
+const displayDate = computed(() => {
+  if (reportStore.selectedMonth) {
+     return reportStore.formattedMonth;
+  }
+  return `All of ${reportStore.selectedYear}`;
+});
+
 const clientData = computed(() => {
   if (!reportStore.reportCache) return null;
   const clientId = Number(router.currentRoute.value.query.ids);
@@ -192,9 +199,22 @@ const clientData = computed(() => {
   }
 
   .report-table {
-    width: 100% !important;
-    border: 1px solid #e0e0e0 !important;
-    .q-table__top { border-bottom: 1px solid #e0e0e0 !important; }
+  td {
+    white-space: normal !important;
+    word-break: break-word;
+    height: auto !important;
+    padding: 12px 8px !important; // Add some breathing room for multi-line rows
   }
+}
+
+@media print {
+  /* Ensure the row expansion is respected by the print engine */
+  .q-table__middle {
+    overflow: visible !important;
+  }
+  .q-table {
+    table-layout: auto !important; // Allows columns to adjust width based on content
+  }
+}
 }
 </style>

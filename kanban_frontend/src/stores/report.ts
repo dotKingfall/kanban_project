@@ -13,7 +13,10 @@ export const useReportStore = defineStore('report', () => {
   const loading = ref(false);
 
   const formattedMonth = computed(() => {
-    return `${selectedYear.value}-${String(selectedMonth.value).padStart(2, '0')}`;
+    if (!selectedMonth.value) return String(selectedYear.value); // Just "2026"
+    
+    const monthStr = String(selectedMonth.value).padStart(2, '0');
+    return `${selectedYear.value}-${monthStr}`; // "2026-02"
   });
 
   const fetchAllReports = async () => {

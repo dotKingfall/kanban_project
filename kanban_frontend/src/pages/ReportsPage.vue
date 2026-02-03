@@ -89,6 +89,7 @@ const currentYear = new Date().getFullYear();
 const yearOptions = Array.from({ length: 101 }, (_, i) => currentYear - i);
 
 const monthOptions = [
+  { label: 'Any', value: null },
   { label: 'January', value: 1 }, { label: 'February', value: 2 },
   { label: 'March', value: 3 }, { label: 'April', value: 4 },
   { label: 'May', value: 5 }, { label: 'June', value: 6 },

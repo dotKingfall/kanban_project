@@ -97,17 +97,27 @@ class ClientController extends Controller
         $request->validate([
             'ids' => 'required|array',
             'ids.*' => 'integer',
-            'month' => 'required|date_format:Y-m', // Format: 2026-02
+            'month' => 'required|string', 
         ]);
 
         $clientIds = $request->input('ids');
-        $month = $request->input('month');
+        $monthParam = $request->input('month');
 
-        // Fetch ONLY demands created in that specific month/year
-        $demands = Demand::whereIn('cliente', $clientIds)
-            ->whereRaw("to_char(data_cadastro, 'YYYY-MM') = ?", [$month])
-            ->get();
+        $query = Demand::whereIn('cliente', $clientIds);
 
+        if (strlen($monthParam) === 4) {
+            // Yearly: "2026"
+            $query->whereYear('data_cadastro', $monthParam);
+        } else {
+            // Monthly: "2026-02"
+            $parts = explode('-', $monthParam);
+            $query->whereYear('data_cadastro', $parts[0])
+                ->whereMonth('data_cadastro', $parts[1]);
+        }
+
+        $demands = $query->get();
+
+        // Stats logic remains the same...
         $stats = [
             'total' => $demands->count(),
             'billed' => $demands->where('cobrada_do_cliente', true)->count(),
@@ -117,7 +127,7 @@ class ClientController extends Controller
         ];
 
         return response()->json([
-            'month' => $month,
+            'month' => $monthParam,
             'demands' => $demands,
             'stats' => $stats
         ]);
