@@ -1,12 +1,32 @@
 <template>
   <q-card class="demand-card" flat bordered>
-    <q-card-section>
-      <!-- Title -->
-      <div class="text-body1 text-weight-bold">{{ demand.titulo }}</div>
+    <q-card-section class="row no-wrap items-start">
+      <div class="col">
+        <!-- Title -->
+        <div class="text-body1 text-weight-bold ellipsis">{{ demand.titulo }}</div>
 
-      <!-- Responsible -->
-      <div v-if="demand.responsavel" class="text-caption text-grey">
-        <q-icon name="person" class="q-mr-xs" />{{ demand.responsavel }}
+        <!-- Responsible -->
+        <div v-if="demand.responsavel" class="text-caption text-grey">
+          <q-icon name="person" class="q-mr-xs" />{{ demand.responsavel }}
+        </div>
+      </div>
+
+      <!-- Actions Menu -->
+      <div class="col-auto">
+        <q-btn flat round dense icon="more_vert" size="sm">
+          <q-menu>
+            <q-list style="min-width: 100px">
+              <q-item clickable v-close-popup @click="$emit('edit', demand)">
+                <q-item-section avatar><q-icon name="edit" size="xs" /></q-item-section>
+                <q-item-section>Edit</q-item-section>
+              </q-item>
+              <q-item clickable v-close-popup @click="$emit('delete', demand)" class="text-negative">
+                <q-item-section avatar><q-icon name="delete" size="xs" /></q-item-section>
+                <q-item-section>Delete</q-item-section>
+              </q-item>
+            </q-list>
+          </q-menu>
+        </q-btn>
       </div>
     </q-card-section>
 
@@ -97,6 +117,9 @@
       <div v-show="isExpanded">
         <q-separator />
         <q-card-section class="q-pt-sm text-body2">
+          <div class="text-weight-medium q-mb-xs">Título Completo:</div>
+          <p class="q-pl-sm">{{ demand.titulo || 'N/A' }}</p>
+
           <div class="text-weight-medium q-mb-xs">Descrição Detalhada:</div>
           <p class="q-pl-sm">{{ demand.descricao_detalhada || 'N/A' }}</p>
 
@@ -116,6 +139,8 @@
 import { ref, computed, type PropType } from 'vue';
 import type { Demand, Client } from './models';
 import { useKanbanStore } from 'src/stores/kanban';
+
+defineEmits(['edit', 'delete']);
 
 const props = defineProps({
   demand: {

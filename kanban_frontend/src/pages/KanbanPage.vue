@@ -27,6 +27,8 @@
             :demands="getDemandsForColumn(col.id)"
             @toggle-hide="toggleHide"
             @create-demand="openCreateDemandDialog"
+            @edit-demand="openEditDemandDialog"
+            @delete-demand="confirmDeleteDemand"
           />
         </template>
       </draggable>
@@ -40,7 +42,7 @@
     <q-dialog v-model="showCreateDemandDialog">
       <q-card style="min-width: 500px">
         <q-card-section>
-          <div class="text-h6">New Demand</div>
+          <div class="text-h6">{{ newDemand.id ? 'Edit Demand' : 'New Demand' }}</div>
         </q-card-section>
 
         <q-card-section class="q-pt-none">
@@ -178,8 +180,19 @@ watch(() => newDemand.value?.status, (newStatus) => {
 
 const openCreateDemandDialog = (column: KanbanColumn) => {
   if (!client.value) return;
+
+  // Calculate the next position in the column (0-indexed).
+  const demandsInColumn = getDemandsForColumn(column.id);
+  const newPosition = demandsInColumn.length;
+
   newDemand.value = makeEmptyDemand(column.id, client.value.id);
-  newDemand.value.status = column.name; // Set initial status based on column
+  newDemand.value.position_in_column = newPosition;
+  newDemand.value.status = column.name;
+  showCreateDemandDialog.value = true;
+};
+
+const openEditDemandDialog = (demand: Demand) => {
+  newDemand.value = { ...demand };
   showCreateDemandDialog.value = true;
 };
 
@@ -190,20 +203,56 @@ const saveNewDemand = async () => {
   }
 
   try {
-    const response = await api.post('/demands', newDemand.value);
-    const createdDemand: Demand = response.data;
+    if (newDemand.value.id) {
+      // Update existing
+      const response = await api.patch(`/demands/${newDemand.value.id}`, newDemand.value);
+      const updatedDemand: Demand = response.data;
 
-    // Optimistic update
-    if (client.value?.demands) {
-      client.value.demands.push(createdDemand);
+      if (client.value?.demands) {
+        const index = client.value.demands.findIndex(d => d.id === updatedDemand.id);
+        if (index !== -1) {
+          client.value.demands[index] = updatedDemand;
+        }
+      }
+      $q.notify({ type: 'positive', message: 'Demand updated successfully' });
+    } else {
+      // Create new
+      const response = await api.post('/demands', newDemand.value);
+      const createdDemand: Demand = response.data;
+
+      if (client.value?.demands) {
+        client.value.demands.push(createdDemand);
+      }
+      $q.notify({ type: 'positive', message: 'Demand created successfully' });
     }
 
     showCreateDemandDialog.value = false;
-    $q.notify({ type: 'positive', message: 'Demand created successfully' });
   } catch (error) {
-    console.error('Failed to create demand', error);
-    $q.notify({ type: 'negative', message: 'Failed to create demand' });
+    console.error('Failed to save demand', error);
+    $q.notify({ type: 'negative', message: 'Failed to save demand' });
   }
+};
+
+const confirmDeleteDemand = (demand: Demand) => {
+  $q.dialog({
+    title: 'Confirm',
+    message: `Are you sure you want to delete "${demand.titulo}"?`,
+    cancel: true,
+    persistent: true
+  }).onOk(() => {
+    void async function deleteDemand() {
+      try {
+      await api.delete('/demands', { data: { ids: [demand.id] } });
+      if (client.value?.demands) {
+        client.value.demands = client.value.demands.filter(d => d.id !== demand.id);
+      }
+      $q.notify({ type: 'positive', message: 'Demand deleted' });
+    } catch (error) {
+      console.error('Failed to delete demand', error);
+      $q.notify({ type: 'negative', message: 'Failed to delete demand' });
+    }
+    }
+  });
 };
 
 const saveColumns = async () => {

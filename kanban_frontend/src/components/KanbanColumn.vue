@@ -48,6 +48,8 @@
           v-for="demand in demands"
           :key="demand.id"
           :demand="demand"
+          @edit="$emit('edit-demand', $event)"
+          @delete="$emit('delete-demand', $event)"
         />
       </div>
       <div v-else class="absolute-center text-grey-5 text-center">
@@ -62,7 +64,7 @@ import type { PropType } from 'vue';
 import type { KanbanColumn, Demand } from './models';
 import DemandCard from './DemandCard.vue';
 
-defineEmits(['create-demand', 'toggle-hide']);
+defineEmits(['create-demand', 'toggle-hide', 'edit-demand', 'delete-demand']);
 
 defineProps({
   column: {
