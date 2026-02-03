@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Client;
 use App\Models\Demand;
+use App\Models\KanbanColumn;
 use Illuminate\Http\Request;
 
 class ClientController extends Controller
@@ -20,9 +21,11 @@ class ClientController extends Controller
         // We fetch all demands belonging to these clients and group them by client ID
         $clientIds = $clients->pluck('id');
         $demands = Demand::whereIn('cliente', $clientIds)->get()->groupBy('cliente');
+        $columns = KanbanColumn::whereIn('client_id', $clientIds)->orderBy('position')->get()->groupBy('client_id');
 
         foreach ($clients as $client) {
             $client->setRelation('demands', $demands->get($client->id, []));
+            $client->setRelation('kanban_columns', $columns->get($client->id, []));
         }
 
         return $clients;
@@ -33,7 +36,10 @@ class ClientController extends Controller
         $client = $request->user()->clients()->findOrFail($id);
         // Fetch demands associated with this client
         $demands = Demand::where('cliente', $id)->get();
+        $columns = KanbanColumn::where('client_id', $id)->orderBy('position')->get();
+
         $client->setRelation('demands', $demands);
+        $client->setRelation('kanban_columns', $columns);
         
         return response()->json($client);
     }
@@ -102,5 +108,26 @@ class ClientController extends Controller
             'month' => $request->input('month'),
             'clients' => $clients,
         ]);
+    }
+
+    public function updateColumns(Request $request)
+    {
+        $request->validate([
+            'columns' => 'required|array',
+            'columns.*.id' => 'required|exists:kanban_columns,id',
+            'columns.*.position' => 'required|integer',
+            'columns.*.is_fixed' => 'boolean',
+            'columns.*.is_hidden' => 'boolean',
+        ]);
+
+        foreach ($request->input('columns') as $colData) {
+            KanbanColumn::where('id', $colData['id'])->update([
+                'position' => $colData['position'],
+                'is_fixed' => $colData['is_fixed'],
+                'is_hidden' => $colData['is_hidden'],
+            ]);
+        }
+
+        return response()->json(['message' => 'Columns updated successfully']);
     }
 }

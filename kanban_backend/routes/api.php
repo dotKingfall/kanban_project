@@ -23,6 +23,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::put('/clients/{id}', [ClientController::class, 'update']);
     Route::delete('/clients', [ClientController::class, 'destroyMany']);
     Route::get('/reports/clients', [ClientController::class, 'reports']);
+    Route::post('/kanban-columns/update', [ClientController::class, 'updateColumns']);
 
     // Demands
     Route::get('/demands', [DemandController::class, 'index']);

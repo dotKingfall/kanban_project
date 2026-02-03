@@ -1,9 +1,10 @@
 import { defineStore } from 'pinia';
 import { api } from 'boot/axios';
-import type { Client, Demand } from 'src/components/models';
+import type { Client, Demand, KanbanColumn } from 'src/components/models';
 
 export interface ClientWithDemands extends Client {
   demands?: Demand[];
+  kanban_columns?: KanbanColumn[];
 }
 
 export const useKanbanStore = defineStore('kanban', {
