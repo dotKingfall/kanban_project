@@ -1,22 +1,5 @@
 <template>
   <q-layout view="lHh Lpr lFf">
-    <!-- Header: Only visible if user is logged in -->
-    <q-header elevated v-if="authStore.user">
-      <q-toolbar>
-
-        <q-btn flat round dense @click="handleLogout" class="q-mr-sm">
-          <LogOut :size="20" />
-          <q-tooltip>Logout</q-tooltip>
-        </q-btn>
-
-        <!-- NAME AND EMAIL -->
-        <q-toolbar-title>
-          {{ authStore.user.first_name }} {{ authStore.user.last_name }}
-          <span class="text-subtitle2 text-weight-light">({{ authStore.user.email }})</span>
-        </q-toolbar-title>
-      </q-toolbar>
-    </q-header>
-
     <!-- 4. Sidebar: Only visible if logged in -->
     <q-drawer
       v-if="authStore.user"
@@ -24,65 +7,97 @@
       show-if-above
       bordered
       :mini="uiStore.isSidebarMini"
+      :mini-width="70"
       :width="250"
     >
-      <q-list padding>
-        <!-- Collapse Toggle -->
-        <q-item clickable v-ripple @click="uiStore.toggleMini">
-          <q-item-section avatar>
-            <component :is="uiStore.isSidebarMini ? ChevronRight : ChevronLeft" />
-          </q-item-section>
-          <q-item-section>Retrair</q-item-section>
-        </q-item>
+      <div class="column full-height">
+        <q-list padding class="col">
+          <!-- Collapse Toggle -->
+          <q-item clickable v-ripple @click="uiStore.toggleMini">
+            <q-item-section avatar>
+              <component :is="uiStore.isSidebarMini ? ChevronRight : ChevronLeft" />
+            </q-item-section>
+            <q-item-section>Retrair</q-item-section>
+          </q-item>
 
-        <q-separator class="q-my-sm" />
+          <q-separator class="q-my-sm" />
 
-        <!-- Navigation -->
-        <q-item clickable v-ripple to="/dashboard" active-class="text-primary bg-blue-1">
-          <q-item-section avatar>
-            <LayoutDashboard />
-          </q-item-section>
+          <!-- Navigation -->
+          <q-item clickable v-ripple to="/dashboard" active-class="text-primary bg-blue-1">
+            <q-item-section avatar>
+              <LayoutDashboard />
+            </q-item-section>
 
-          <q-item-section>
-            Clientes
-            <!-- Small label below icon in mini mode is tricky in standard Quasar, 
-                 standard behavior is hiding text. We use tooltip for mini mode UX -->
-            <q-tooltip v-if="uiStore.isSidebarMini" anchor="center right" self="center left" :offset="[10, 10]">
+            <q-item-section>
               Clientes
-            </q-tooltip>
-          </q-item-section>
-        </q-item>
+              <!-- Small label below icon in mini mode is tricky in standard Quasar, 
+                   standard behavior is hiding text. We use tooltip for mini mode UX -->
+              <q-tooltip v-if="uiStore.isSidebarMini" anchor="center right" self="center left" :offset="[10, 10]">
+                Clientes
+              </q-tooltip>
+            </q-item-section>
+          </q-item>
 
-        <q-item clickable v-ripple to="/all-demands" active-class="text-primary bg-blue-1">
-          <q-item-section avatar>
-            <MessageCircleWarning />
-          </q-item-section>
+          <q-item clickable v-ripple to="/all-demands" active-class="text-primary bg-blue-1">
+            <q-item-section avatar>
+              <MessageCircleWarning />
+            </q-item-section>
 
-          <q-item-section>
-            Todas as Demandas
-            <!-- Small label below icon in mini mode is tricky in standard Quasar, 
-                 standard behavior is hiding text. We use tooltip for mini mode UX -->
-            <q-tooltip v-if="uiStore.isSidebarMini" anchor="center right" self="center left" :offset="[10, 10]">
+            <q-item-section>
               Todas as Demandas
-            </q-tooltip>
-          </q-item-section>
-        </q-item>
+              <!-- Small label below icon in mini mode is tricky in standard Quasar, 
+                   standard behavior is hiding text. We use tooltip for mini mode UX -->
+              <q-tooltip v-if="uiStore.isSidebarMini" anchor="center right" self="center left" :offset="[10, 10]">
+                Todas as Demandas
+              </q-tooltip>
+            </q-item-section>
+          </q-item>
 
-        <q-item clickable v-ripple to="/reports" active-class="text-primary bg-blue-1">
-          <q-item-section avatar>
-            <Mail />
-          </q-item-section>
+          <q-item clickable v-ripple to="/reports" active-class="text-primary bg-blue-1">
+            <q-item-section avatar>
+              <Mail />
+            </q-item-section>
 
-          <q-item-section>
-            Relatórios
-            <!-- Small label below icon in mini mode is tricky in standard Quasar, 
-                 standard behavior is hiding text. We use tooltip for mini mode UX -->
-            <q-tooltip v-if="uiStore.isSidebarMini" anchor="center right" self="center left" :offset="[10, 10]">
+            <q-item-section>
               Relatórios
-            </q-tooltip>
-          </q-item-section>
-        </q-item>
-      </q-list>
+              <!-- Small label below icon in mini mode is tricky in standard Quasar, 
+                   standard behavior is hiding text. We use tooltip for mini mode UX -->
+              <q-tooltip v-if="uiStore.isSidebarMini" anchor="center right" self="center left" :offset="[10, 10]">
+                Relatórios
+              </q-tooltip>
+            </q-item-section>
+          </q-item>
+        </q-list>
+
+        <q-list padding>
+          <q-separator class="q-my-sm" />
+
+          <!-- User Info -->
+          <q-item class="q-mb-sm">
+            <q-item-section avatar>
+              <q-avatar color="primary" text-color="white">
+                {{ authStore.user.first_name.charAt(0).toUpperCase() }}
+              </q-avatar>
+            </q-item-section>
+            <q-item-section>
+              <q-item-label class="text-weight-bold">{{ authStore.user.first_name }} {{ authStore.user.last_name }}</q-item-label>
+              <q-item-label caption>{{ authStore.user.email }}</q-item-label>
+            </q-item-section>
+          </q-item>
+
+          <q-item clickable v-ripple @click="handleLogout">
+            <q-item-section avatar>
+              <LogOut :size="20" />
+            </q-item-section>
+            <q-item-section>
+              Logout
+              <q-tooltip v-if="uiStore.isSidebarMini" anchor="center right" self="center left" :offset="[10, 10]">
+                Logout
+              </q-tooltip>
+            </q-item-section>
+          </q-item>
+        </q-list>
+      </div>
     </q-drawer>
 
     <q-page-container>
