@@ -33,6 +33,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::patch('/demands/{id}', [DemandController::class, 'update']);
     Route::patch('/demands/{id}/status', [DemandController::class, 'updateStatus']);
     Route::patch('/demands/{id}/position', [DemandController::class, 'updatePosition']);
+    Route::post('/demands/reorder', [DemandController::class, 'reorder']);
     Route::delete('/demands/{demand}', [DemandController::class, 'destroy']);
 
     // Kanban Columns

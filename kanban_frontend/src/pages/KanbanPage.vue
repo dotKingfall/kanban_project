@@ -29,6 +29,7 @@
             @create-demand="openCreateDemandDialog"
             @edit-demand="openEditDemandDialog"
             @delete-demand="confirmDeleteDemand"
+            @demand-update="handleDemandUpdate"
           />
         </template>
       </draggable>
@@ -170,7 +171,9 @@ onMounted(async () => {
 
 const getDemandsForColumn = (columnId: number): Demand[] => {
   if (!client.value || !client.value.demands) return [];
-  return client.value.demands.filter(d => d.kanban_column_id === columnId);
+  return client.value.demands
+    .filter(d => d.kanban_column_id === columnId)
+    .sort((a, b) => a.position_in_column - b.position_in_column);
 };
 
 const statusOptions = computed(() =>
@@ -259,6 +262,87 @@ const confirmDeleteDemand = (demand: Demand) => {
       $q.notify({ type: 'negative', message: 'Failed to delete demand' });
     }
   });
+};
+
+interface ReorderPayload {
+  id: number;
+  position_in_column: number;
+  kanban_column_id: number;
+}
+
+const handleDemandUpdate = async ({ change, column }: { change: any, column: KanbanColumn }) => {
+  if (!client.value?.demands) return;
+
+  if (change.moved) {
+    // --- A demand was reordered within the SAME column ---
+    const list = getDemandsForColumn(column.id);
+    const movedItem = list.find(d => d.id === change.moved.element.id);
+    if (!movedItem) return;
+
+    list.splice(list.indexOf(movedItem), 1);
+    list.splice(change.moved.newIndex, 0, movedItem);
+
+    const payload: ReorderPayload[] = list.map((demand, index) => {
+      demand.position_in_column = index; // Optimistic update
+      return { id: demand.id, position_in_column: index, kanban_column_id: column.id };
+    });
+
+    try {
+      // Send batch update
+      await api.post('/demands/reorder', { demands: payload });
+      $q.notify({ type: 'positive', message: 'Demand reordered' });
+    } catch (error) {
+      console.error('Failed to reorder demand:', error);
+      $q.notify({ type: 'negative', message: 'Failed to reorder demand' });
+      await kanbanStore.fetchClients(true);
+      client.value = kanbanStore.getClientById(route.params.clientId as string) || null;
+    }
+  } else if (change.added) {
+    // --- A demand was moved to a NEW column ---
+    const movedDemand = client.value.demands.find(d => d.id === change.added.element.id);
+    if (!movedDemand) return;
+
+    const sourceColumnId = movedDemand.kanban_column_id;
+    const targetColumn = column;
+
+    // 1. Prepare Source List: Remove the moved item and re-index
+    // We filter from the main list, excluding the moved item
+    const sourceList = client.value.demands
+      .filter(d => d.kanban_column_id === sourceColumnId && d.id !== movedDemand.id)
+      .sort((a, b) => a.position_in_column - b.position_in_column);
+
+    // 2. Prepare Target List: Get existing items, insert moved item at new index
+    const targetList = client.value.demands
+      .filter(d => d.kanban_column_id === targetColumn.id && d.id !== movedDemand.id)
+      .sort((a, b) => a.position_in_column - b.position_in_column);
+    
+    // Optimistic Update on the moved object
+    movedDemand.kanban_column_id = targetColumn.id;
+    movedDemand.status = targetColumn.name;
+
+    // Insert into target list at the correct visual position
+    targetList.splice(change.added.newIndex, 0, movedDemand);
+
+    try {
+      const sourcePayload = sourceList.map((d, i) => {
+        d.position_in_column = i;
+        return { id: d.id, position_in_column: i, kanban_column_id: sourceColumnId };
+      });
+
+      const targetPayload = targetList.map((d, i) => {
+        d.position_in_column = i;
+        return { id: d.id, position_in_column: i, kanban_column_id: targetColumn.id };
+      });
+
+      await api.post('/demands/reorder', { demands: [...sourcePayload, ...targetPayload] });
+      $q.notify({ type: 'positive', message: `Moved to ${targetColumn.name}` });
+    } catch (error) {
+      console.error('Failed to move demand:', error);
+      $q.notify({ type: 'negative', message: 'Failed to move demand' });
+      await kanbanStore.fetchClients(true);
+      client.value = kanbanStore.getClientById(route.params.clientId as string) || null;
+    }
+  }
 };
 
 const saveColumns = async () => {

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Demand;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\DB;
 
 class DemandController extends Controller
 {
@@ -82,6 +83,37 @@ class DemandController extends Controller
         $demand->update($request->only(['position_in_column', 'kanban_column_id']));
         
         return response()->json($demand);
+    }
+
+    public function reorder(Request $request)
+    {
+        $request->validate([
+            'demands' => 'required|array',
+            'demands.*.id' => 'required|exists:demands,id',
+            'demands.*.position_in_column' => 'required|integer',
+            'demands.*.kanban_column_id' => 'nullable|exists:kanban_columns,id',
+        ]);
+
+        $demandsData = $request->input('demands');
+
+        DB::transaction(function () use ($demandsData) {
+            // 1. Temporarily set positions to a negative value based on ID to avoid unique constraint collisions
+            // during the swap process.
+            foreach ($demandsData as $data) {
+                Demand::where('id', $data['id'])->update(['position_in_column' => -1 * $data['id']]);
+            }
+
+            // 2. Set the actual new positions and columns
+            foreach ($demandsData as $data) {
+                $updateData = ['position_in_column' => $data['position_in_column']];
+                if (isset($data['kanban_column_id'])) {
+                    $updateData['kanban_column_id'] = $data['kanban_column_id'];
+                }
+                Demand::where('id', $data['id'])->update($updateData);
+            }
+        });
+
+        return response()->noContent();
     }
 
     public function destroy(Demand $demand)

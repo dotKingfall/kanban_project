@@ -43,30 +43,38 @@
 
     <!-- Column Content -->
     <div v-if="!column.is_hidden" class="col q-pa-sm scroll-y relative-position">
-      <div v-if="demands.length > 0" class="q-gutter-y-sm">
-        <demand-card
-          v-for="demand in demands"
-          :key="demand.id"
-          :demand="demand"
-          @edit="$emit('edit-demand', $event)"
-          @delete="$emit('delete-demand', $event)"
-        />
-      </div>
-      <div v-else class="absolute-center text-grey-5 text-center">
-        Empty
-      </div>
+      <draggable
+        v-model="localDemands"
+        item-key="id"
+        class="q-gutter-y-sm full-height"
+        group="demands"
+        ghost-class="ghost-card"
+        @change="onDemandChange"
+        style="min-height: 50px"
+      >
+        <template #item="{ element: demand }">
+          <div>
+            <demand-card
+              :demand="demand"
+              @edit="$emit('edit-demand', $event)"
+              @delete="$emit('delete-demand', $event)"
+            />
+          </div>
+        </template>
+      </draggable>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import type { PropType } from 'vue';
+import { ref, watch, type PropType } from 'vue';
 import type { KanbanColumn, Demand } from './models';
+import draggable from 'vuedraggable';
 import DemandCard from './DemandCard.vue';
 
-defineEmits(['create-demand', 'toggle-hide', 'edit-demand', 'delete-demand']);
+const emit = defineEmits(['create-demand', 'toggle-hide', 'edit-demand', 'delete-demand', 'demand-update']);
 
-defineProps({
+const props = defineProps({
   column: {
     type: Object as PropType<KanbanColumn>,
     required: true,
@@ -76,6 +84,16 @@ defineProps({
     default: () => [],
   },
 });
+
+const localDemands = ref<Demand[]>([]);
+
+watch(() => props.demands, (newVal) => {
+  localDemands.value = [...newVal];
+}, { immediate: true });
+
+const onDemandChange = (change: any) => {
+  emit('demand-update', { change, column: props.column });
+};
 </script>
 
 <style lang="scss" scoped>
@@ -96,5 +114,9 @@ defineProps({
 }
 .cursor-move {
   cursor: move;
+}
+.ghost-card {
+  opacity: 0.5;
+  background: #e0e0e0;
 }
 </style>
