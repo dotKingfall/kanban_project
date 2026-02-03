@@ -1,15 +1,18 @@
 <template>
-  <div>
+  <q-page class="q-pa-md column no-wrap overflow-hidden" style="height: 100vh;">
     <q-table
       title="Clients"
       :rows="filteredClients"
       :columns="columns"
       row-key="id"
       :loading="loading"
-      :rows-per-page-options="[0]"
       flat
       bordered
       @row-click="onRowClick"
+
+      virtual-scroll
+      class="col" 
+      :rows-per-page-options="[0]"
     >
       <template v-slot:top-right>
         <div class="row q-gutter-sm items-center">
@@ -154,7 +157,7 @@
         </q-card-actions>
       </q-card>
     </q-dialog>
-  </div>
+  </q-page>
 </template>
 
 <script setup lang="ts">

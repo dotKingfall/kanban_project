@@ -1,5 +1,5 @@
 <template>
-  <q-page padding>
+  <q-page>
     <div v-if="user">
       <clients-table />
     </div>

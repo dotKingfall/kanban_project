@@ -1,33 +1,47 @@
 <template>
-  <q-page class="q-pa-md">
+  <q-page class="q-pa-md column no-wrap overflow-hidden" style="height: 100vh;">
     <q-table
       title="All Demands"
-      :rows="sortedDemands"
+      :rows="filteredDemands"
       :columns="columns"
       row-key="id"
       :loading="loading"
-      :filter="filter"
+      @row-click="onRowClick"
+
       flat
       bordered
-      @row-click="onRowClick"
+      virtual-scroll
+      class="col" 
       :rows-per-page-options="[0]"
     >
       <template v-slot:top-right>
-        <q-input borderless dense debounce="300" v-model="filter" placeholder="Search">
-          <template v-slot:append>
-            <q-icon name="search" />
-          </template>
-        </q-input>
+        <div class="row q-gutter-sm items-center">
+          <q-select
+            v-model="searchType"
+            :options="searchOptions"
+            dense
+            outlined
+            options-dense
+            emit-value
+            map-options
+            style="min-width: 120px"
+          />
+          <q-input v-model="search" dense outlined placeholder="Search" clearable>
+            <template v-slot:append>
+              <q-icon name="search" />
+            </template>
+          </q-input>
+
         <q-btn
           flat
           round
           color="primary"
           icon="refresh"
-          class="q-ml-md"
           @click="() => loadData(true)"
         >
           <q-tooltip>Refresh</q-tooltip>
         </q-btn>
+        </div>
       </template>
 
       <template v-slot:body-cell-priority="props">
@@ -63,7 +77,11 @@ import type { Demand } from 'src/components/models';
 const router = useRouter();
 const kanbanStore = useKanbanStore();
 const loading = ref(false);
-const filter = ref('');
+const search = ref('');
+const searchType = ref('titulo');
+const searchOptions = [
+  { label: 'Title', value: 'titulo' },
+];
 
 const columns: QTableColumn[] = [
   { name: 'titulo', label: 'Title', field: 'titulo', sortable: true, align: 'left' },
@@ -74,24 +92,17 @@ const columns: QTableColumn[] = [
   { name: 'tempo_estimado', label: 'Est. Time', field: 'tempo_estimado', sortable: true, align: 'right' },
 ];
 
-const sortedDemands = computed(() => {
-  const allDemands: Demand[] = [];
-  
-  kanbanStore.clients.forEach(client => {
-    if (client.demands) {
-      client.demands.forEach(demand => {
-        if (demand.status !== 'Concluído') {
-          allDemands.push(demand);
-        }
-      });
-    }
-  });
-
-  return allDemands.sort((a, b) => {
-    const pA = a.priority_table_id || 999;
-    const pB = b.priority_table_id || 999;
-    return pA - pB;
-  });
+const filteredDemands = computed(() => {
+  // Use the cached getter from the store for performance
+  const demands = kanbanStore.activeDemands;
+  if (!search.value) {
+    return demands;
+  }
+  const searchTerm = search.value.toLowerCase();
+  // The search is simple and only works on the title for now
+  return demands.filter(demand =>
+    demand.titulo?.toLowerCase().includes(searchTerm)
+  );
 });
 
 const getClientName = (clientId: number) => {
@@ -100,6 +111,8 @@ const getClientName = (clientId: number) => {
 };
 
 const loadData = async (force = false) => {
+  if (!force && kanbanStore.loaded) return;
+
   loading.value = true;
   try {
     await kanbanStore.fetchClients(force);

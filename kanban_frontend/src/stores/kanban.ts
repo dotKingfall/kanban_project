@@ -15,6 +15,26 @@ export const useKanbanStore = defineStore('kanban', {
     loaded: false,
     lookupsLoaded: false,
   }),
+  getters: {
+    /**
+     * Returns a flattened, sorted list of all demands that are not 'Concluído'.
+     * This is cached by Pinia and will only re-compute if the client data changes.
+     */
+    activeDemands(state): Demand[] {
+      const allDemands: Demand[] = [];
+      state.clients.forEach(client => {
+        if (client.demands) {
+          client.demands.forEach(demand => {
+            if (demand.status !== 'Concluído') {
+              allDemands.push(demand);
+            }
+          });
+        }
+      });
+      // Sort by priority (lower is higher)
+      return allDemands.sort((a, b) => (a.priority_table_id || 999) - (b.priority_table_id || 999));
+    }
+  },
   actions: {
     async fetchClients(force = false) {
       // If we already have data and aren't forcing a refresh, do nothing (Cache)
