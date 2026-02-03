@@ -2,7 +2,7 @@
   <div>
     <q-table
       title="Clients"
-      :rows="clients"
+      :rows="filteredClients"
       :columns="columns"
       row-key="id"
       :loading="loading"
@@ -12,6 +12,12 @@
       @row-click="onRowClick"
     >
       <template v-slot:top-right>
+        <div class="row q-gutter-sm items-center">
+          <client-search-bar
+            v-model:search="search"
+            v-model:searchType="searchType"
+          />
+
         <q-btn
           flat
           round
@@ -31,6 +37,7 @@
         >
           <q-tooltip>Create new</q-tooltip>
         </q-btn>
+        </div>
       </template>
 
       <template #body-cell-observacao="props">
@@ -157,6 +164,7 @@ import { useRouter } from 'vue-router';
 import { useAuthStore } from 'stores/auth';
 import { useKanbanStore } from 'stores/kanban';
 import { useQuasar, type QTableColumn } from 'quasar';
+import ClientSearchBar from 'src/components/ClientSearchBar.vue';
 import type { Client } from 'src/components/models';
 
 const $q = useQuasar();
@@ -170,6 +178,18 @@ const editingClient = ref<Client>({} as Client);
 const isSaving = ref(false);
 const showObservationDialog = ref(false);
 const selectedObservation = ref('');
+
+const search = ref('');
+const searchType = ref('nome');
+
+const filteredClients = computed(() => {
+  if (!search.value) return kanbanStore.clients;
+  const term = search.value.toLowerCase();
+  return kanbanStore.clients.filter((c: any) => {
+    const val = c[searchType.value];
+    return typeof val === 'string' && val.toLowerCase().includes(term);
+  });
+});
 
 const columns: QTableColumn[] = [
   { name: 'nome', label: 'Name', field: 'nome', sortable: true, align: 'left' },
