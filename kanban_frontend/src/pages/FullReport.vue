@@ -29,19 +29,24 @@
       <div class="col-12 col-sm-8">
         <q-card flat bordered class="shadow-1 dashboard-card">
           <q-card-section class="full-height column justify-center">
-            <div class="text-subtitle2 q-mb-md">Status Overview</div>
-            <div class="row items-center q-gutter-md wrap">
-              <q-chip 
+            <div class="text-subtitle2 q-pb-xs">Status Overview</div>
+            <div class="row items-center">
+              <div
                 v-for="(count, status) in clientData.stats.by_status" 
-                :key="status" 
-                outline 
-                :color="count > 0 ? 'primary' : 'grey-5'" 
-                dense
-                class="q-ma-none status-chip"
+                :key="status"
+                class="q-pr-sm q-mb-xs"
               >
-                <span :class="count > 0 ? 'text-weight-bold' : ''">{{ status }}:</span> 
-                <span class="q-ml-xs">{{ count }}</span>
-              </q-chip>
+                <q-chip
+                  outline 
+                  :color="count > 0 ? 'primary' : 'grey-5'" 
+                  dense
+                  class="status-chip"
+                  >
+                  <span :class="count > 0 ? 'text-weight-bold' : ''">{{ status }}:</span> 
+                  <span class="q-ml-xs">{{ count }}</span>
+                </q-chip>
+              </div>
+      
             </div>
           </q-card-section>
         </q-card>
@@ -176,9 +181,9 @@ const clientData = computed(() => {
   .col-sm-8 { width: 66.66% !important; }
 
   /* Keep colors in print */
-  .bg-primary { background-color: #1976D2 !important; -webkit-print-color-adjust: exact; }
-  .bg-green-7 { background-color: #388E3C !important; -webkit-print-color-adjust: exact; }
-  .text-white { color: white !important; -webkit-print-color-adjust: exact; }
+  .bg-primary { background-color: #1976D2 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .bg-green-7 { background-color: #388E3C !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .text-white { color: white !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 
   .q-card { 
     border: 1px solid #e0e0e0 !important;
