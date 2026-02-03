@@ -21,12 +21,12 @@
         <div class="row no-wrap items-center" :class="{ 'column q-gutter-y-sm q-mt-sm': column.is_hidden }">
           <q-btn
             v-if="!column.is_hidden"
-            flat round dense size="sm"
-            icon="add_circle"
-            color="positive"
+            flat round dense size="md"
+            icon="add"
+            color="primary"
             @click="$emit('create-demand', column)"
           >
-            <q-tooltip>Create Demand</q-tooltip>
+            <q-tooltip>Criar Demanda</q-tooltip>
           </q-btn>
 
           <q-btn
@@ -35,13 +35,13 @@
             :color="column.is_hidden ? 'negative' : 'grey-7'"
             @click="$emit('toggle-hide', column)"
           >
-            <q-tooltip>{{ column.is_hidden ? 'Show' : 'Hide' }}</q-tooltip>
+            <q-tooltip>{{ column.is_hidden ? 'Exibir' : 'Esconder' }}</q-tooltip>
           </q-btn>
         </div>
       </div>
     </div>
 
-    <!-- Column Content -->
+    <!-- COLUMN DRAGGABLE CONTENT -->
     <div v-if="!column.is_hidden" class="col q-pa-sm scroll-y relative-position">
       <draggable
         v-model="localDemands"
@@ -91,6 +91,7 @@ watch(() => props.demands, (newVal) => {
   localDemands.value = [...newVal];
 }, { immediate: true });
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const onDemandChange = (change: any) => {
   emit('demand-update', { change, column: props.column });
 };
