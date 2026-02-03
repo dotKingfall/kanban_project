@@ -79,7 +79,7 @@ onMounted(async () => {
 
 const getDemandsForColumn = (columnId: number): Demand[] => {
   if (!client.value || !client.value.demands) return [];
-  return client.value.demands.filter(d => d.column_id === columnId);
+  return client.value.demands.filter(d => d.kanban_column_id === columnId);
 };
 
 const saveColumns = async () => {
