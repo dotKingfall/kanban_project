@@ -20,12 +20,13 @@
         <!-- Actions -->
         <div class="row no-wrap items-center" :class="{ 'column q-gutter-y-sm q-mt-sm': column.is_hidden }">
           <q-btn
+            v-if="!column.is_hidden"
             flat round dense size="sm"
-            :icon="column.is_fixed ? 'push_pin' : 'o_push_pin'"
-            :color="column.is_fixed ? 'primary' : 'grey-7'"
-            @click="$emit('toggle-pin', column)"
+            icon="add_circle"
+            color="positive"
+            @click="$emit('create-demand', column)"
           >
-            <q-tooltip>{{ column.is_fixed ? 'Unpin' : 'Pin' }}</q-tooltip>
+            <q-tooltip>Create Demand</q-tooltip>
           </q-btn>
 
           <q-btn
@@ -61,7 +62,7 @@ import type { PropType } from 'vue';
 import type { KanbanColumn, Demand } from './models';
 import DemandCard from './DemandCard.vue';
 
-defineEmits(['toggle-pin', 'toggle-hide']);
+defineEmits(['create-demand', 'toggle-hide']);
 
 defineProps({
   column: {

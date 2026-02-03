@@ -25,8 +25,8 @@
           <kanban-column-component
             :column="col"
             :demands="getDemandsForColumn(col.id)"
-            @toggle-pin="togglePin"
             @toggle-hide="toggleHide"
+            @create-demand="openCreateDemandDialog"
           />
         </template>
       </draggable>
@@ -35,18 +35,70 @@
     <div v-else class="flex flex-center absolute-center text-negative">
       Client not found.
     </div>
+
+    <!-- Create Demand Dialog -->
+    <q-dialog v-model="showCreateDemandDialog">
+      <q-card style="min-width: 500px">
+        <q-card-section>
+          <div class="text-h6">New Demand</div>
+        </q-card-section>
+
+        <q-card-section class="q-pt-none">
+          <q-form @submit="saveNewDemand" class="q-gutter-md">
+            <q-input
+              v-model="newDemand.titulo"
+              label="Title"
+              :rules="[val => !!val || 'Title is required']"
+              outlined
+              dense
+            />
+            <q-select
+              v-model="newDemand.status"
+              :options="statusOptions"
+              label="Status / Column"
+              outlined
+              dense
+            />
+            <q-input v-model="newDemand.responsavel" label="Responsible" outlined dense />
+            <q-input v-model="newDemand.prioridade" label="Priority" outlined dense hint="Ex: Urgente, Alta, Média, Baixa" />
+            <q-input v-model="newDemand.setor" label="Department" outlined dense />
+            <q-input v-model="newDemand.quem_deve_testar" label="Tester" outlined dense />
+            <q-input
+              v-model="newDemand.descricao_detalhada"
+              label="Detailed Description"
+              type="textarea"
+              outlined
+              dense
+            />
+            <div class="row q-gutter-sm">
+              <q-input v-model.number="newDemand.tempo_estimado" type="number" label="Estimated Time (h)" outlined dense style="width: 150px" />
+              <q-toggle v-model="newDemand.cobrada_do_cliente" label="Bill to client" />
+            </div>
+
+            <div align="right" class="q-mt-md">
+              <q-btn flat label="Cancel" color="primary" v-close-popup />
+              <q-btn label="Save" type="submit" color="primary" />
+            </div>
+          </q-form>
+        </q-card-section>
+      </q-card>
+    </q-dialog>
   </q-page>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useRouter } from 'vue-router';
 import { api } from 'boot/axios';
 import { useQuasar } from 'quasar';
 import draggable from 'vuedraggable';
 import { useKanbanStore, type ClientWithDemands } from 'src/stores/kanban';
-import type { KanbanColumn, Demand } from 'src/components/models';
+import {
+  type KanbanColumn,
+  type Demand,
+  makeEmptyDemand,
+} from 'src/components/models';
 import KanbanColumnComponent from 'src/components/KanbanColumn.vue';
 
 const $q = useQuasar();
@@ -56,6 +108,8 @@ const kanbanStore = useKanbanStore();
 const client = ref<ClientWithDemands | null>(null);
 const loading = ref(true);
 const localColumns = ref<KanbanColumn[]>([]);
+const showCreateDemandDialog = ref(false);
+const newDemand = ref<Partial<Demand>>({});
 
 onMounted(async () => {
   try {
@@ -80,6 +134,49 @@ onMounted(async () => {
 const getDemandsForColumn = (columnId: number): Demand[] => {
   if (!client.value || !client.value.demands) return [];
   return client.value.demands.filter(d => d.kanban_column_id === columnId);
+};
+
+const statusOptions = computed(() =>
+  localColumns.value.filter(c => !c.is_hidden).map(c => c.name)
+);
+
+watch(() => newDemand.value?.status, (newStatus) => {
+  if (newStatus && newDemand.value) {
+    const targetColumn = localColumns.value.find(c => c.name === newStatus);
+    if (targetColumn) {
+      newDemand.value.kanban_column_id = targetColumn.id;
+    }
+  }
+});
+
+const openCreateDemandDialog = (column: KanbanColumn) => {
+  if (!client.value) return;
+  newDemand.value = makeEmptyDemand(column.id, client.value.id);
+  newDemand.value.status = column.name; // Set initial status based on column
+  showCreateDemandDialog.value = true;
+};
+
+const saveNewDemand = async () => {
+  if (!newDemand.value.titulo) {
+    $q.notify({ type: 'negative', message: 'Title is required' });
+    return;
+  }
+
+  try {
+    const response = await api.post('/demands', newDemand.value);
+    const createdDemand: Demand = response.data;
+
+    // Optimistic update
+    if (client.value?.demands) {
+      client.value.demands.push(createdDemand);
+    }
+
+    showCreateDemandDialog.value = false;
+    $q.notify({ type: 'positive', message: 'Demand created successfully' });
+  } catch (error) {
+    console.error('Failed to create demand', error);
+    $q.notify({ type: 'negative', message: 'Failed to create demand' });
+  }
 };
 
 const saveColumns = async () => {
@@ -107,11 +204,6 @@ const saveColumns = async () => {
     console.error('Failed to save columns', error);
     $q.notify({ type: 'negative', message: 'Failed to save column changes' });
   }
-};
-
-const togglePin = async (col: KanbanColumn) => {
-  col.is_fixed = !col.is_fixed;
-  await saveColumns();
 };
 
 const toggleHide = async (col: KanbanColumn) => {
