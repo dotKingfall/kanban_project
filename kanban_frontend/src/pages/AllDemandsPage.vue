@@ -123,11 +123,11 @@ const loadData = async (force = false) => {
   }
 };
 
-const onRowClick = (evt: Event, row: Demand) => {
-  router.push(`/kanban/${row.cliente}`);
+const onRowClick = async (evt: Event, row: Demand) => {
+  await router.push(`/kanban/${row.cliente}`);
 };
 
-onMounted(() => {
-  loadData();
+onMounted(async () => {
+  await loadData();
 });
 </script>

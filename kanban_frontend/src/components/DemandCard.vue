@@ -118,16 +118,16 @@
         <q-separator />
         <q-card-section class="q-pt-sm text-body2">
           <div class="text-weight-medium q-mb-xs">Título Completo:</div>
-          <p class="q-pl-sm">{{ demand.titulo || 'N/A' }}</p>
-
-          <div class="text-weight-medium q-mb-xs">Descrição Detalhada:</div>
-          <p class="q-pl-sm">{{ demand.descricao_detalhada || 'N/A' }}</p>
+          <p class="q-pl-sm">{{ props.demand.titulo || 'N/A' }}</p>
+props.
+          <div class="text-weighprops.t-medium q-mb-xs">Descrição Detalhada:</div>
+          <p class="q-pl-sm">{{ props.demand.descricao_detalhada || 'N/A' }}</p>
 
           <div class="text-weight-medium q-mb-xs">Quem Deve Testar:</div>
-          <p class="q-pl-sm">{{ demand.quem_deve_testar || 'N/A' }}</p>
+          <p class="q-pl-sm">{{ props.demand.quem_deve_testar || 'N/A' }}</p>
 
           <div class="text-caption text-grey q-mt-md">
-            Cadastrado em: {{ new Date(demand.data_cadastro).toLocaleString() }}
+            Cadastrado em: {{ new Date(props.demand.data_cadastro).toLocaleString() }}
           </div>
         </q-card-section>
       </div>
@@ -136,9 +136,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, type PropType } from 'vue';
-import type { Demand, Client } from './models';
-import { useKanbanStore } from 'src/stores/kanban';
+import { ref, type PropType } from 'vue';
+import type { Demand } from './models';
 
 defineEmits(['edit', 'delete']);
 
@@ -150,13 +149,7 @@ const props = defineProps({
 });
 
 const isExpanded = ref(false);
-const kanbanStore = useKanbanStore();
 
-const client = computed<Client | undefined>(() => {
-  // The store needs to be loaded with clients for this to work.
-  // In the context of KanbanPage, it will be.
-  return kanbanStore.getClientById(props.demand.cliente);
-});
 </script>
 
 <style lang="scss" scoped>

@@ -85,6 +85,9 @@ class ClientSeeder extends Seeder
                     'prioridade' => $priority->name,
                     'setor' => $department->name,
                     'status' => $column->name,
+                    
+                    // Date
+                    'data_cadastro' => fake()->dateTimeBetween('-1 year', 'now'),
 
                     // Fields
                     'titulo' => fake()->sentence(4),
