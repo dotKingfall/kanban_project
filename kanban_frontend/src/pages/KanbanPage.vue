@@ -1,14 +1,14 @@
 <template>
-  <q-page class="q-pa-md column no-wrap" style="height: calc(100vh - 50px);">
+  <q-page class="q-pa-md column no-wrap" style="height: 100vh;">
     <div v-if="loading" class="flex flex-center absolute-center">
       <q-spinner size="3em" color="primary" />
     </div>
 
-    <div v-else-if="client" style="height: calc(100vh - 50px);">
+    <div v-else-if="client" class="col column no-wrap full-width full-height">
       <!-- Header -->
       <div class="row items-center q-mb-md flex-shrink-0">
         <q-btn flat round icon="arrow_back" color="primary" @click="router.back()" class="q-mr-sm" />
-        <div class="text-h4">{{ client.nome }}</div>
+        <div class="text-h5">{{ client.nome }}</div>
       </div>
 
       <!-- Kanban Board Area -->
@@ -16,12 +16,24 @@
         <div
           v-for="col in localColumns"
           :key="col.id"
+      <draggable
+        v-model="localColumns"
+        item-key="id"
+        class="row no-wrap q-gutter-x-md full-height items-start scroll-x-auto"
+        handle=".cursor-move"
+        :animation="200"
+        ghost-class="ghost-card"
+        @end="saveColumns"
+      >
+        <template #item="{ element: col }">
+          <div
           class="kanban-column column no-wrap rounded-borders"
           :class="{ 'is-hidden': col.is_hidden, 'bg-grey-2': !col.is_hidden, 'bg-grey-3': col.is_hidden }"
           @drop="onDrop($event, col)"
           @dragover.prevent
           @dragenter.prevent
         >
+          >
           <!-- Column Header -->
           <div
             class="column-header row items-center justify-between q-pa-sm bg-grey-3 rounded-borders"
@@ -70,6 +82,8 @@
           </div>
         </div>
       </div>
+        </template>
+      </draggable>
     </div>
 
     <div v-else class="flex flex-center absolute-center text-negative">
@@ -84,6 +98,7 @@ import { useRoute } from 'vue-router';
 import { useRouter } from 'vue-router';
 import { api } from 'boot/axios';
 import { useQuasar } from 'quasar';
+import draggable from 'vuedraggable';
 import { useKanbanStore, type ClientWithDemands } from 'src/stores/kanban';
 import type { KanbanColumn } from 'src/components/models';
 
@@ -211,5 +226,9 @@ const onDrop = (evt: DragEvent, targetCol: KanbanColumn) => {
 }
 .cursor-move {
   cursor: move;
+}
+.ghost-card {
+  opacity: 0.5;
+  background: #F2C037;
 }
 </style>
