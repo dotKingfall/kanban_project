@@ -5,7 +5,6 @@ export const useUiStore = defineStore('ui', () => {
   const isSidebarOpen = ref(true);
   const isSidebarMini = ref(false);
 
-  // Initialize from localStorage
   const storedMini = localStorage.getItem('ui-sidebar-mini');
   if (storedMini !== null) {
     isSidebarMini.value = storedMini === 'true';
@@ -16,7 +15,6 @@ export const useUiStore = defineStore('ui', () => {
     isSidebarOpen.value = storedOpen === 'true';
   }
 
-  // Persist state changes
   watch(isSidebarMini, (val) => {
     localStorage.setItem('ui-sidebar-mini', String(val));
   });

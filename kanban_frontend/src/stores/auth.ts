@@ -17,11 +17,11 @@ export const useAuthStore = defineStore('auth', {
         throw error;
       }
     },
+
     async login(payload: { email: string; password: string }) {
       try {
         const response = await api.post('/login', payload);
 
-        // 2. If successful, update state and fetch user data
         if (response.status === 200 || response.status === 204) {
           localStorage.setItem('is_logged_in', 'true');
           return await this.fetchUser();
@@ -32,6 +32,7 @@ export const useAuthStore = defineStore('auth', {
         throw error; 
       }
     },
+    
     async logout() {
       try {
         await api.post('/logout');
