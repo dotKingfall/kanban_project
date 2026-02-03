@@ -102,6 +102,55 @@
               outlined
               dense
             />
+
+            <!-- Attachments -->
+            <div class="q-mt-md">
+              <div class="row items-center justify-between q-mb-xs">
+                <div class="text-subtitle2">Links & Anexos</div>
+                <q-btn 
+                  flat round dense 
+                  color="primary" 
+                  icon="add_link" 
+                  @click="addLinkRow"
+                >
+                  <q-tooltip>Adicionar Link</q-tooltip>
+                </q-btn>
+              </div>
+
+              <q-scroll-area 
+                style="height: 150px; border: 1px solid rgba(0,0,0,0.12);" 
+                class="rounded-borders q-pa-sm bg-grey-1"
+              >
+                <div v-if="!newDemand.anexos || newDemand.anexos.length === 0" class="flex flex-center full-height text-grey-5">
+                  Nenhum link adicionado.
+                </div>
+
+                <div 
+                  v-for="(link, index) in newDemand.anexos" 
+                  :key="index"
+                  class="row no-wrap items-center q-mb-sm q-pa-xs rounded-borders link-row cursor-pointer"
+                  @click="openLink(link.url)"
+                >
+                  <q-input 
+                    v-model="link.url" 
+                    dense 
+                    outlined 
+                    placeholder="https://..." 
+                    class="col q-mr-sm bg-white"
+                    @click.stop 
+                  />
+                  
+                  <q-btn 
+                    flat round dense 
+                    color="negative" 
+                    icon="remove_circle_outline" 
+                    size="sm"
+                    @click.stop="removeExistingAttachment(index)"
+                  />
+                </div>
+              </q-scroll-area>
+            </div>
+
             <div class="row q-gutter-sm items-center">
               <q-input v-model.number="newDemand.tempo_estimado" type="number" label="Estimated Time (h)" outlined dense style="width: 150px" />
               <q-toggle v-model="newDemand.cobrada_do_cliente" label="Bill to client" />
@@ -143,6 +192,7 @@ const loading = ref(true);
 const localColumns = ref<KanbanColumn[]>([]);
 const showCreateDemandDialog = ref(false);
 const newDemand = ref<Partial<Demand>>({});
+const newFiles = ref<File[]>([]);
 const priorityOptions = computed(() => kanbanStore.priorities);
 const departmentOptions = computed(() => kanbanStore.departments);
 
@@ -199,12 +249,43 @@ const openCreateDemandDialog = (column: KanbanColumn) => {
   newDemand.value = makeEmptyDemand(column.id, client.value.id);
   newDemand.value.position_in_column = newPosition;
   newDemand.value.status = column.name;
+  newFiles.value = [];
   showCreateDemandDialog.value = true;
 };
 
 const openEditDemandDialog = (demand: Demand) => {
   newDemand.value = { ...demand };
+  // Create a copy of the attachments array to avoid modifying the original object
+  // if the user cancels the edit.
+  if (newDemand.value.anexos) {
+    newDemand.value.anexos = [...newDemand.value.anexos];
+  }
+  newFiles.value = [];
   showCreateDemandDialog.value = true;
+};
+
+const addLinkRow = () => {
+  if (!newDemand.value.anexos) {
+    newDemand.value.anexos = [];
+  }
+  // We use url property to match your JSON structure
+  newDemand.value.anexos.push({ name: 'Link', url: '' });
+};
+
+const openLink = (url: string) => {
+  if (!url || url.trim() === '') return;
+  
+  // Ensure the URL has a protocol
+  const target = url.startsWith('http') ? url : `https://${url}`;
+  
+  // Securely open in a new tab
+  window.open(target, '_blank', 'noopener,noreferrer');
+};
+
+const removeExistingAttachment = (index: number) => {
+  if (newDemand.value.anexos) {
+    newDemand.value.anexos.splice(index, 1);
+  }
 };
 
 const saveNewDemand = async () => {
@@ -213,10 +294,18 @@ const saveNewDemand = async () => {
     return;
   }
 
+  // We no longer need FormData since we are just sending text/links
+  // Just send the newDemand object directly
+  const payload = {
+    ...newDemand.value,
+    // Ensure anexos is sent as an array (Laravel will handle the JSON cast)
+    anexos: newDemand.value.anexos || [] 
+  };
+
   try {
     if (newDemand.value.id) {
       // Update existing
-      const response = await api.patch(`/demands/${newDemand.value.id}`, newDemand.value);
+      const response = await api.patch(`/demands/${newDemand.value.id}`, payload);
       const updatedDemand: Demand = response.data;
 
       if (client.value?.demands) {
@@ -228,7 +317,7 @@ const saveNewDemand = async () => {
       $q.notify({ type: 'positive', message: 'Demand updated successfully' });
     } else {
       // Create new
-      const response = await api.post('/demands', newDemand.value);
+      const response = await api.post('/demands', payload);
       const createdDemand: Demand = response.data;
 
       if (client.value?.demands) {
@@ -391,5 +480,12 @@ const toggleHide = async (col: KanbanColumn) => {
 .ghost-card {
   opacity: 0.5;
   background: #F2C037;
+}
+
+.link-row {
+  transition: background 0.2s ease;
+}
+.link-row:hover {
+  background: rgba(0, 0, 0, 0.05) !important;
 }
 </style>

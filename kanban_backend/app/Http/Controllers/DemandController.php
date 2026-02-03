@@ -30,6 +30,7 @@ class DemandController extends Controller
             'cobrada_do_cliente' => 'sometimes|boolean',
             'flag_returned' => 'sometimes|boolean',
             'status' => 'required|string',
+            'anexos' => 'nullable|array',
         ]);
 
         if ($validator->fails()) {
