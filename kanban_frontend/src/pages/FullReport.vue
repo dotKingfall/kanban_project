@@ -2,9 +2,9 @@
   <q-page class="q-pa-md column no-wrap overflow-hidden bg-white" id="printable-area">
     <div class="row items-center q-mb-md no-print">
       <q-btn flat round icon="arrow_back" color="primary" @click="router.back()" />
-      <div class="text-h5 q-ml-sm">Demand Report: {{ displayDate }}</div>
+      <div class="text-h5 q-ml-sm">Relatório: {{ displayDate }}</div>
       <q-space />
-      <q-btn color="primary" icon="print" label="Print PDF" @click="printPDF" />
+      <q-btn color="primary" icon="print" label="Gerar PDF" @click="printPDF" />
     </div>
 
     <div class="row q-col-gutter-md q-mb-md" v-if="clientData">
@@ -20,7 +20,7 @@
       <div class="col-12 col-sm-2">
         <q-card dark class="bg-green-7 text-white shadow-2 dashboard-card">
           <q-card-section class="flex flex-center column full-height">
-            <div class="text-overline">Billed</div>
+            <div class="text-overline">Cobrado</div>
             <div class="text-h4 text-weight-bolder">{{ clientData.stats.billed }}</div>
           </q-card-section>
         </q-card>
@@ -29,7 +29,7 @@
       <div class="col-12 col-sm-8">
         <q-card flat bordered class="shadow-1 dashboard-card">
           <q-card-section class="full-height column justify-center">
-            <div class="text-subtitle2 q-pb-xs">Status Overview</div>
+            <div class="text-subtitle2 q-pb-xs">Status</div>
             <div class="row items-center">
               <div
                 v-for="(count, status) in clientData.stats.by_status" 
@@ -54,7 +54,6 @@
     </div>
 
     <q-table
-      title="Demand Report"
       class="col report-table"
       :rows="clientData?.demands || []"
       :columns="columns"
@@ -65,7 +64,7 @@
     >
       <template v-slot:body-cell-billed="props">
         <q-td :props="props">
-          <q-chip v-if="props.row.cobrada_do_cliente" color="green-1" text-color="green-9" icon="check_circle" label="Billed" size="sm" dense class="text-weight-bold" />
+          <q-chip v-if="props.row.cobrada_do_cliente" color="green-1" text-color="green-9" icon="check_circle" label="Cobrado" size="sm" dense class="text-weight-bold" />
           <q-icon v-else name="history" color="grey-4" size="xs" />
         </q-td>
       </template>
@@ -80,7 +79,7 @@
     </q-table>
 
     <div class="q-mt-md no-print">
-      <q-input v-model="observationText" type="textarea" outlined label="Internal Notes" placeholder="Type notes here..." dense />
+      <q-input v-model="observationText" type="textarea" outlined label="Notas internas" placeholder="Type notes here..." dense />
     </div>
   </q-page>
 </template>
@@ -100,11 +99,11 @@ const observationText = ref('');
 const printPDF = () => { window.print(); };
 
 const columns: QTableColumn[] = [
-  { name: 'titulo', label: 'Title', field: 'titulo', align: 'left', sortable: true },
+  { name: 'titulo', label: 'Título', field: 'titulo', align: 'left', sortable: true },
   { name: 'status', label: 'Status', field: 'status', align: 'center', sortable: true },
-  { name: 'billed', label: 'Billing Status', field: 'cobrada_do_cliente', align: 'center', sortable: true },
-  { name: 'tempo_estimado', label: 'Est. Time (h)', field: 'tempo_estimado', align: 'right', sortable: true },
-  { name: 'tempo_gasto', label: 'Spent Time (h)', field: 'tempo_gasto', align: 'right', sortable: true },
+  { name: 'billed', label: 'Status de Cobrança', field: 'cobrada_do_cliente', align: 'center', sortable: true },
+  { name: 'tempo_estimado', label: 'Tempo Estimado (h)', field: 'tempo_estimado', align: 'right', sortable: true },
+  { name: 'tempo_gasto', label: 'Tempo Gasto (h)', field: 'tempo_gasto', align: 'right', sortable: true },
 ];
 
 const displayDate = computed(() => {

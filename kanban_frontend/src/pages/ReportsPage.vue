@@ -8,7 +8,7 @@
       <q-select
         v-model="reportStore.selectedYear"
         :options="yearOptions"
-        label="Year"
+        label="Ano"
         outlined
         dense
         :disable="reportStore.loading"
@@ -18,7 +18,7 @@
       <q-select
         v-model="reportStore.selectedMonth"
         :options="monthOptions"
-        label="Month"
+        label="Mês"
         outlined
         dense
         emit-value
@@ -30,7 +30,7 @@
 
     <div class="col relative-position">
       <q-table
-        title="Client Reports"
+        title="Relatório de Clientes"
         :rows="filteredClients"
         :columns="columns"
         row-key="id"
@@ -99,9 +99,9 @@ const monthOptions = [
 ];
 
 const columns: QTableColumn[] = [
-  { name: 'nome', label: 'Name', field: 'nome', sortable: true, align: 'left' },
+  { name: 'nome', label: 'Nome', field: 'nome', sortable: true, align: 'left' },
   { name: 'email', label: 'Email', field: 'email', sortable: true, align: 'left' },
-  { name: 'observacao', label: 'Observation', field: 'observacao', align: 'left' },
+  { name: 'observacao', label: 'Observação', field: 'observacao', align: 'left' },
 ];
 
 const filteredClients = computed(() => {
