@@ -93,22 +93,34 @@ class ClientController extends Controller
     }
 
     public function reports(Request $request)
-    {
-        // get/reports/clients?ids[]=1&ids[]=2&month=YYYY-MM
-        $request->validate([
-            'ids' => 'required|array',
-            'ids.*' => 'integer',
-            'month' => 'required|date_format:Y-m',
-        ]);
+{
+    $request->validate([
+        'ids' => 'required|array',
+        'ids.*' => 'integer',
+        'month' => 'required|date_format:Y-m',
+    ]);
 
-        // TODO include demands/stats for the specific month
-        $clients = Client::whereIn('id', $request->input('ids'))->get();
+    $clientIds = $request->input('ids');
+    $month = $request->input('month'); // "YYYY-MM"
 
-        return response()->json([
-            'month' => $request->input('month'),
-            'clients' => $clients,
-        ]);
-    }
+    // Fetch demands for these clients created in the specific month
+    $demands = Demand::whereIn('cliente', $clientIds)
+        ->whereRaw("to_char(created_at, 'YYYY-MM') = ?", [$month])
+        ->get();
+
+    // Stats calculations
+    $stats = [
+        'total' => $demands->count(),
+        'billed' => $demands->where('cobrada_do_cliente', true)->count(),
+        'by_status' => $demands->groupBy('status')->map(fn($group) => $group->count()),
+    ];
+
+    return response()->json([
+        'month' => $month,
+        'demands' => $demands,
+        'stats' => $stats
+    ]);
+}
 
     public function updateColumns(Request $request)
     {

@@ -63,6 +63,9 @@ import { useKanbanStore } from 'stores/kanban';
 import ClientSearchBar from 'src/components/ClientSearchBar.vue';
 import type { QTableColumn } from 'quasar';
 import type { Client } from 'src/components/models';
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
 
 const kanbanStore = useKanbanStore();
 const loading = ref(false);
@@ -110,12 +113,17 @@ const filteredClients = computed(() => {
   });
 });
 
-const onRowClick = (evt: Event, row: Client) => {
-  console.log('row clicked', {
-    client: row.nome,
-    year: selectedYear.value,
-    month: selectedMonth.value
+const onRowClick = async (evt: Event, row: Client) => {
+  const formattedMonth = `${selectedYear.value}-${String(selectedMonth.value).padStart(2, '0')}`;
+
+  await router.push({
+    path: '/full-reports',
+    query: { 
+      ids: [row.id], 
+      month: formattedMonth 
+    }
   });
+
 };
 
 onMounted(async () => {

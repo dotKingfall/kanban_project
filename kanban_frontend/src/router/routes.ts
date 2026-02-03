@@ -10,6 +10,7 @@ const routes: RouteRecordRaw[] = [
       { path: 'kanban/:clientId', component: () => import('pages/KanbanPage.vue'), meta: { requiresAuth: true } },
       { path: 'all-demands', component: () => import('pages/AllDemandsPage.vue'), meta: { requiresAuth: true } },
       { path: 'reports', component: () => import('pages/ReportsPage.vue'), meta: { requiresAuth: true } },
+      { path: 'full-reports', component: () => import('pages/FullReport.vue'), meta: { requiresAuth: true } },
     ],
   },
 
