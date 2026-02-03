@@ -93,34 +93,35 @@ class ClientController extends Controller
     }
 
     public function reports(Request $request)
-{
-    $request->validate([
-        'ids' => 'required|array',
-        'ids.*' => 'integer',
-        'month' => 'required|date_format:Y-m',
-    ]);
+    {
+        $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'integer',
+            'month' => 'required|date_format:Y-m', // Format: 2026-02
+        ]);
 
-    $clientIds = $request->input('ids');
-    $month = $request->input('month'); // "YYYY-MM"
+        $clientIds = $request->input('ids');
+        $month = $request->input('month');
 
-    // Fetch demands for these clients created in the specific month
-    $demands = Demand::whereIn('cliente', $clientIds)
-        ->whereRaw("to_char(created_at, 'YYYY-MM') = ?", [$month])
-        ->get();
+        // Fetch ONLY demands created in that specific month/year
+        $demands = Demand::whereIn('cliente', $clientIds)
+            ->whereRaw("to_char(created_at, 'YYYY-MM') = ?", [$month])
+            ->get();
 
-    // Stats calculations
-    $stats = [
-        'total' => $demands->count(),
-        'billed' => $demands->where('cobrada_do_cliente', true)->count(),
-        'by_status' => $demands->groupBy('status')->map(fn($group) => $group->count()),
-    ];
+        $stats = [
+            'total' => $demands->count(),
+            'billed' => $demands->where('cobrada_do_cliente', true)->count(),
+            'total_estimated' => $demands->sum('tempo_estimado'),
+            'total_spent' => $demands->sum('tempo_gasto'),
+            'by_status' => $demands->groupBy('status')->map(fn($group) => $group->count()),
+        ];
 
-    return response()->json([
-        'month' => $month,
-        'demands' => $demands,
-        'stats' => $stats
-    ]);
-}
+        return response()->json([
+            'month' => $month,
+            'demands' => $demands,
+            'stats' => $stats
+        ]);
+    }
 
     public function updateColumns(Request $request)
     {
