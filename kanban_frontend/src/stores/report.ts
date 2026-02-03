@@ -1,19 +1,31 @@
 import { defineStore } from 'pinia';
-import { ref, watch } from 'vue';
+import { ref, watch, computed } from 'vue';
 
 export const useReportStore = defineStore('report', () => {
-  const currentYear = new Date().getFullYear();
-  const currentMonth = new Date().getMonth() + 1;
+  // 1. Initial State (Try to get from local storage, otherwise use "now")
+  const selectedYear = ref(
+    Number(localStorage.getItem('report-year')) || new Date().getFullYear()
+  );
+  const selectedMonth = ref(
+    Number(localStorage.getItem('report-month')) || new Date().getMonth() + 1
+  );
 
-  const selectedYear = ref(Number(localStorage.getItem('report-year')) || currentYear);
-  const selectedMonth = ref(Number(localStorage.getItem('report-month')) || currentMonth);
+  // 2. Methods/Computed for formatting
+  // This gives you "2026-02" automatically
+  const formattedMonth = computed(() => {
+    const monthStr = String(selectedMonth.value).padStart(2, '0');
+    return `${selectedYear.value}-${monthStr}`;
+  });
 
-  watch(selectedYear, (val) => localStorage.setItem('report-year', String(val)));
-  watch(selectedMonth, (val) => localStorage.setItem('report-month', String(val)));
+  // 3. Persist changes whenever the user picks a new date
+  watch([selectedYear, selectedMonth], ([newYear, newMonth]) => {
+    localStorage.setItem('report-year', String(newYear));
+    localStorage.setItem('report-month', String(newMonth));
+  });
 
-  const getFormattedMonth = () => {
-    return `${selectedYear.value}-${String(selectedMonth.value).padStart(2, '0')}`;
+  return { 
+    selectedYear, 
+    selectedMonth, 
+    formattedMonth 
   };
-
-  return { selectedYear, selectedMonth, getFormattedMonth };
 });
