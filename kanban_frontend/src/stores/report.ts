@@ -42,10 +42,10 @@ export const useReportStore = defineStore('report', () => {
   };
 
   // Watch for date changes to refresh the cache automatically
-  watch([selectedYear, selectedMonth], () => {
+  watch([selectedYear, selectedMonth], async () => {
     localStorage.setItem('report-year', String(selectedYear.value));
     localStorage.setItem('report-month', String(selectedMonth.value));
-    fetchAllReports();
+    await fetchAllReports();
   });
 
   return { 
