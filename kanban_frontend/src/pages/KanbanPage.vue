@@ -60,8 +60,30 @@
               dense
             />
             <q-input v-model="newDemand.responsavel" label="Responsible" outlined dense />
-            <q-input v-model="newDemand.prioridade" label="Priority" outlined dense hint="Ex: Urgente, Alta, Média, Baixa" />
-            <q-input v-model="newDemand.setor" label="Department" outlined dense />
+            
+            <q-select
+              v-model="newDemand.priority_table_id"
+              :options="priorityOptions"
+              option-label="name"
+              option-value="id"
+              label="Priority"
+              outlined
+              dense
+              emit-value
+              map-options
+            />
+            <q-select
+              v-model="newDemand.department_table_id"
+              :options="departmentOptions"
+              option-label="name"
+              option-value="id"
+              label="Department"
+              outlined
+              dense
+              emit-value
+              map-options
+            />
+            
             <q-input v-model="newDemand.quem_deve_testar" label="Tester" outlined dense />
             <q-input
               v-model="newDemand.descricao_detalhada"
@@ -110,13 +132,18 @@ const loading = ref(true);
 const localColumns = ref<KanbanColumn[]>([]);
 const showCreateDemandDialog = ref(false);
 const newDemand = ref<Partial<Demand>>({});
+const priorityOptions = computed(() => kanbanStore.priorities);
+const departmentOptions = computed(() => kanbanStore.departments);
 
 onMounted(async () => {
   try {
     // Ensure we have data. If user refreshed page directly here, this will fetch it.
     // If coming from Dashboard, this uses the cache immediately.
-    await kanbanStore.fetchClients();
-    
+    await Promise.all([
+      kanbanStore.fetchClients(),
+      kanbanStore.fetchLookups()
+    ]);
+
     const foundClient = kanbanStore.getClientById(route.params.clientId as string);
     client.value = foundClient || null;
     

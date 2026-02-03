@@ -132,7 +132,6 @@ const client = computed<Client | undefined>(() => {
   // In the context of KanbanPage, it will be.
   return kanbanStore.getClientById(props.demand.cliente);
 });
-console.log("demands are:", props.demand);
 </script>
 
 <style lang="scss" scoped>

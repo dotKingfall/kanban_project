@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import { api } from 'boot/axios';
-import type { Client, Demand, KanbanColumn } from 'src/components/models';
+import type { Client, Demand, KanbanColumn, Priority, Department } from 'src/components/models';
 
 export interface ClientWithDemands extends Client {
   demands?: Demand[];
@@ -10,7 +10,10 @@ export interface ClientWithDemands extends Client {
 export const useKanbanStore = defineStore('kanban', {
   state: () => ({
     clients: [] as ClientWithDemands[],
+    priorities: [] as Priority[],
+    departments: [] as Department[],
     loaded: false,
+    lookupsLoaded: false,
   }),
   actions: {
     async fetchClients(force = false) {
@@ -27,6 +30,23 @@ export const useKanbanStore = defineStore('kanban', {
       }
     },
     
+    async fetchLookups(force = false) {
+      if (this.lookupsLoaded && !force) return;
+
+      try {
+        const [prioritiesRes, departmentsRes] = await Promise.all([
+          api.get<Priority[]>('/priorities'),
+          api.get<Department[]>('/departments')
+        ]);
+        this.priorities = prioritiesRes.data;
+        this.departments = departmentsRes.data;
+        this.lookupsLoaded = true;
+      } catch (error) {
+        console.error('Error fetching lookups:', error);
+        throw error;
+      }
+    },
+
     getClientById(id: number | string) {
       // Convert id to number for comparison
       const numericId = Number(id);
