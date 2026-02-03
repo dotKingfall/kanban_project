@@ -1,31 +1,59 @@
 import { defineStore } from 'pinia';
 import { ref, watch, computed } from 'vue';
+import { api } from 'boot/axios';
+import { useKanbanStore } from './kanban';
 
 export const useReportStore = defineStore('report', () => {
-  // 1. Initial State (Try to get from local storage, otherwise use "now")
-  const selectedYear = ref(
-    Number(localStorage.getItem('report-year')) || new Date().getFullYear()
-  );
-  const selectedMonth = ref(
-    Number(localStorage.getItem('report-month')) || new Date().getMonth() + 1
-  );
+  const kanbanStore = useKanbanStore();
 
-  // 2. Methods/Computed for formatting
-  // This gives you "2026-02" automatically
+  const selectedYear = ref(Number(localStorage.getItem('report-year')) || new Date().getFullYear());
+  const selectedMonth = ref(Number(localStorage.getItem('report-month')) || new Date().getMonth() + 1);
+  
+  const reportCache = ref<any>(null); 
+  const loading = ref(false);
+
   const formattedMonth = computed(() => {
-    const monthStr = String(selectedMonth.value).padStart(2, '0');
-    return `${selectedYear.value}-${monthStr}`;
+    return `${selectedYear.value}-${String(selectedMonth.value).padStart(2, '0')}`;
   });
 
-  // 3. Persist changes whenever the user picks a new date
-  watch([selectedYear, selectedMonth], ([newYear, newMonth]) => {
-    localStorage.setItem('report-year', String(newYear));
-    localStorage.setItem('report-month', String(newMonth));
+  const fetchAllReports = async () => {
+    // Wait for kanbanStore if it hasn't fetched clients yet
+    if (kanbanStore.clients.length === 0) {
+      await kanbanStore.fetchClients();
+    }
+
+    const ids = kanbanStore.clients.map(c => c.id);
+    if (ids.length === 0) return;
+
+    loading.value = true;
+    try {
+      const response = await api.get('/reports/clients', {
+        params: { 
+          ids, 
+          month: formattedMonth.value 
+        }
+      });
+      reportCache.value = response.data;
+    } catch (error) {
+      console.error('Failed to fetch global reports:', error);
+    } finally {
+      loading.value = false;
+    }
+  };
+
+  // Watch for date changes to refresh the cache automatically
+  watch([selectedYear, selectedMonth], () => {
+    localStorage.setItem('report-year', String(selectedYear.value));
+    localStorage.setItem('report-month', String(selectedMonth.value));
+    fetchAllReports();
   });
 
   return { 
     selectedYear, 
     selectedMonth, 
-    formattedMonth 
+    formattedMonth, 
+    reportCache, 
+    loading, 
+    fetchAllReports 
   };
 });
