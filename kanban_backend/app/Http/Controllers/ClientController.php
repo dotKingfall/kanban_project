@@ -53,14 +53,35 @@ class ClientController extends Controller
             'avisar_por_email' => 'boolean',
             'avisar_por_whatsapp' => 'boolean',
             'observacao' => 'nullable|string',
-            'reverse_filter' => 'boolean',
-            'global_filter_id' => 'nullable|exists:demand_filter_types,id',
             'user_id' => 'required|exists:users,id',
         ]);
 
         $client = Client::create($validated);
+        $this->createDefaultColumns($client->id);
+
         return response()->json($client, 201);
     }
+
+/**
+ * Creates the standard workflow columns for a new client.
+ */
+private function createDefaultColumns(int $clientId)
+{
+    $defaults = [
+        'Backlog', 'Autorização', 'Fila', 'Em desenvolvimento',
+        'Teste', 'Deploy', 'Concluído'
+    ];
+
+    foreach ($defaults as $index => $name) {
+        KanbanColumn::create([
+            'client_id' => $clientId,
+            'name' => $name,
+            'position' => $index,
+            'is_fixed' => false,
+            'is_hidden' => false,
+        ]);
+    }
+}
 
     public function update(Request $request, $id)
     {
@@ -81,14 +102,9 @@ class ClientController extends Controller
         return response()->json($client);
     }
 
-    public function destroyMany(Request $request)
+    public function destroyMany(int $id)
     {
-        $request->validate([
-            'ids' => 'required|array',
-            'ids.*' => 'exists:clients,id',
-        ]);
-
-        Client::destroy($request->input('ids'));
+        Client::destroy($id);
         return response()->json(['message' => 'Clients deleted successfully']);
     }
 
