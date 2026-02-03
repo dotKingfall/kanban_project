@@ -18,8 +18,16 @@ class ClientSeeder extends Seeder
         $departments = Department::all();
         $users = User::all();
 
+        if ($users->isEmpty()) {
+        $this->command->error('No users found! Please seed users first.');
+        return;
+    }
+
         // Create 40 clients (20 for each of the 2 users)
         for ($i = 0; $i < 40; $i++) {
+
+            $randomUser = $users->random();
+
             $client = Client::create([
                 'nome' => fake()->company(),
                 'email' => fake()->companyEmail(),
@@ -27,7 +35,7 @@ class ClientSeeder extends Seeder
                 'observacao' => rand(0, 1) ? fake()->paragraph() : null,
                 'avisar_por_email' => rand(0, 1),
                 'avisar_por_whatsapp' => rand(0, 1),
-                'user_id' => $i < 20 ? $users[0]->id : $users[1]->id,
+                'user_id' => $randomUser->id,
             ]);
 
             // Create Kanban Columns for this client
