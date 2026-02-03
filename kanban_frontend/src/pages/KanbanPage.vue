@@ -58,10 +58,16 @@
               v-model="newDemand.status"
               :options="statusOptions"
               label="Status / Column"
+              :rules="[val => !!val || 'Status is required']"
               outlined
               dense
             />
-            <q-input v-model="newDemand.responsavel" label="Responsible" outlined dense />
+            <q-input
+              v-model="newDemand.responsavel"
+              label="Responsible"
+              :rules="[val => !!val || 'Responsible is required']"
+              outlined
+              dense />
             
             <q-select
               v-model="newDemand.priority_table_id"
@@ -70,6 +76,7 @@
               option-value="id"
               label="Priority"
               outlined
+              :rules="[val => val !== null && val !== undefined || 'Priority is required']"
               dense
               emit-value
               map-options
@@ -94,9 +101,10 @@
               outlined
               dense
             />
-            <div class="row q-gutter-sm">
+            <div class="row q-gutter-sm items-center">
               <q-input v-model.number="newDemand.tempo_estimado" type="number" label="Estimated Time (h)" outlined dense style="width: 150px" />
               <q-toggle v-model="newDemand.cobrada_do_cliente" label="Bill to client" />
+              <q-toggle v-model="newDemand.flag_returned" label="Returned" color="orange" />
             </div>
 
             <div align="right" class="q-mt-md">
@@ -239,18 +247,16 @@ const confirmDeleteDemand = (demand: Demand) => {
     message: `Are you sure you want to delete "${demand.titulo}"?`,
     cancel: true,
     persistent: true
-  }).onOk(() => {
-    void async function deleteDemand() {
-      try {
-      await api.delete('/demands', { data: { ids: [demand.id] } });
+  }).onOk(async () => {
+    try {
+      await api.delete(`/demands/${demand.id}`);
       if (client.value?.demands) {
         client.value.demands = client.value.demands.filter(d => d.id !== demand.id);
       }
       $q.notify({ type: 'positive', message: 'Demand deleted' });
     } catch (error) {
-      console.error('Failed to delete demand', error);
+      console.error('Failed to delete demand:', error);
       $q.notify({ type: 'negative', message: 'Failed to delete demand' });
-    }
     }
   });
 };

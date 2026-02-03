@@ -9,6 +9,8 @@ class Demand extends Model
 {
     use HasFactory;
 
+    protected $with = ['priority_obj', 'department_obj'];
+
     protected $fillable = [
         'cliente',
         'kanban_column_id',
@@ -41,5 +43,20 @@ class Demand extends Model
     public function client()
     {
         return $this->belongsTo(Client::class, 'cliente');
+    }
+
+    public function priority_obj()
+    {
+        return $this->belongsTo(Priority::class, 'priority_table_id');
+    }
+
+    public function department_obj()
+    {
+        return $this->belongsTo(Department::class, 'department_table_id');
+    }
+
+    public function getPrioridadeAttribute($value)
+    {
+        return $this->priority_obj ? $this->priority_obj->name : $value;
     }
 }
