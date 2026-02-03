@@ -250,8 +250,9 @@ const confirmDeleteDemand = (demand: Demand) => {
     message: `Are you sure you want to delete "${demand.titulo}"?`,
     cancel: true,
     persistent: true
-  }).onOk(async () => {
-    try {
+  }).onOk(() => {
+    void(async () => {
+      try {
       await api.delete(`/demands/${demand.id}`);
       if (client.value?.demands) {
         client.value.demands = client.value.demands.filter(d => d.id !== demand.id);
@@ -261,6 +262,7 @@ const confirmDeleteDemand = (demand: Demand) => {
       console.error('Failed to delete demand:', error);
       $q.notify({ type: 'negative', message: 'Failed to delete demand' });
     }
+    })();
   });
 };
 
@@ -270,6 +272,7 @@ interface ReorderPayload {
   kanban_column_id: number;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const handleDemandUpdate = async ({ change, column }: { change: any, column: KanbanColumn }) => {
   if (!client.value?.demands) return;
 
