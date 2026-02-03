@@ -320,7 +320,11 @@ const saveNewDemand = async () => {
       const response = await api.post('/demands', payload);
       const createdDemand: Demand = response.data;
 
-      if (client.value?.demands) {
+      if (client.value) {
+        if (!client.value.demands) {
+          client.value.demands = [];
+        }
+
         client.value.demands.push(createdDemand);
       }
       $q.notify({ type: 'positive', message: 'Demand created successfully' });
