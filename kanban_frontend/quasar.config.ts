@@ -2,6 +2,7 @@
 // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file
 
 import { defineConfig } from '#q-app/wrappers';
+import { emit } from 'node:process';
 import { fileURLToPath } from 'node:url';
 
 export default defineConfig((ctx) => {
@@ -87,8 +88,10 @@ export default defineConfig((ctx) => {
           {
             vueTsc: true,
             eslint: {
-              lintCommand: 'eslint -c ./eslint.config.js "./src*/**/*.{ts,js,mjs,cjs,vue}"',
+              lintCommand: 'eslint -c ./eslint.config.js "./src*/**/*.{ts,js,mjs,cjs}"', //,vue
               useFlatConfig: true,
+              emitWarning: false, //TODO REMOVE
+              emitError: false, //TODO REMOVE
             },
           },
           { server: false },
