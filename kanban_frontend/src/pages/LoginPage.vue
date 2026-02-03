@@ -54,6 +54,7 @@ import { useAuthStore } from 'stores/auth';
 const email = ref('');
 const password = ref('');
 const loading = ref(false);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const loginForm = ref<any>(null);
 const router = useRouter();
 const authStore = useAuthStore();

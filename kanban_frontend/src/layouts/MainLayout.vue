@@ -1,6 +1,6 @@
 <template>
   <q-layout view="lHh Lpr lFf">
-    <!-- 4. Sidebar: Only visible if logged in -->
+
     <q-drawer
       v-if="authStore.user"
       v-model="uiStore.isSidebarOpen"
@@ -12,7 +12,7 @@
     >
       <div class="column full-height">
         <q-list padding class="col">
-          <!-- Collapse Toggle -->
+          <!-- BOTÃO DE COLLAPSE -->
           <q-item clickable v-ripple @click="uiStore.toggleMini">
             <q-item-section avatar>
               <component :is="uiStore.isSidebarMini ? ChevronRight : ChevronLeft" />
@@ -22,16 +22,14 @@
 
           <q-separator class="q-my-sm" />
 
-          <!-- Navigation -->
           <q-item clickable v-ripple to="/dashboard" active-class="text-primary bg-blue-1">
             <q-item-section avatar>
               <LayoutDashboard />
             </q-item-section>
 
+            <!--CLIENTS PAGE-->
             <q-item-section>
               Clientes
-              <!-- Small label below icon in mini mode is tricky in standard Quasar, 
-                   standard behavior is hiding text. We use tooltip for mini mode UX -->
               <q-tooltip v-if="uiStore.isSidebarMini" anchor="center right" self="center left" :offset="[10, 10]">
                 Clientes
               </q-tooltip>
@@ -43,10 +41,9 @@
               <MessageCircleWarning />
             </q-item-section>
 
+            <!--ALL DEMANDS PAGE-->
             <q-item-section>
               Todas as Demandas
-              <!-- Small label below icon in mini mode is tricky in standard Quasar, 
-                   standard behavior is hiding text. We use tooltip for mini mode UX -->
               <q-tooltip v-if="uiStore.isSidebarMini" anchor="center right" self="center left" :offset="[10, 10]">
                 Todas as Demandas
               </q-tooltip>
@@ -58,10 +55,9 @@
               <Mail />
             </q-item-section>
 
+            <!--REPORTS PAGE-->
             <q-item-section>
               Relatórios
-              <!-- Small label below icon in mini mode is tricky in standard Quasar, 
-                   standard behavior is hiding text. We use tooltip for mini mode UX -->
               <q-tooltip v-if="uiStore.isSidebarMini" anchor="center right" self="center left" :offset="[10, 10]">
                 Relatórios
               </q-tooltip>
@@ -72,7 +68,7 @@
         <q-list padding>
           <q-separator class="q-my-sm" />
 
-          <!-- User Info -->
+          <!-- USER INFO AND LOGOUT -->
           <q-item class="q-mb-sm">
             <q-item-section avatar>
               <q-avatar color="primary" text-color="white">
@@ -85,12 +81,20 @@
             </q-item-section>
           </q-item>
 
-          <q-item clickable v-ripple @click="handleLogout">
+          <q-item 
+            clickable 
+            v-ripple 
+            @click="handleLogout"
+            :disable="isLoggingOut"
+            :class="{ 'text-grey-6': isLoggingOut }"
+          >
             <q-item-section avatar>
-              <LogOut :size="20" />
+              <q-spinner-dots v-if="isLoggingOut" color="primary" size="20px" />
+              <LogOut v-else :size="20" />
             </q-item-section>
+            
             <q-item-section>
-              Logout
+              {{ isLoggingOut ? 'Saindo...' : 'Logout' }}
               <q-tooltip v-if="uiStore.isSidebarMini" anchor="center right" self="center left" :offset="[10, 10]">
                 Logout
               </q-tooltip>
@@ -118,18 +122,23 @@ import { useAuthStore } from 'stores/auth';
 import { useUiStore } from 'stores/ui';
 import { useRouter } from 'vue-router';
 import { LogOut, ChevronLeft, ChevronRight, LayoutDashboard, Mail, MessageCircleWarning } from 'lucide-vue-next';
+import { ref } from 'vue';
 
 const authStore = useAuthStore();
 const uiStore = useUiStore();
 const router = useRouter();
 
+const isLoggingOut = ref(false);
+
 const handleLogout = async () => {
+  isLoggingOut.value = true;
   try {
     await authStore.logout();
   } catch (error) {
     console.error('Logout failed', error);
   } finally {
     await router.push('/');
+    isLoggingOut.value = false;
   }
 };
 </script>
