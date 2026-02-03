@@ -9,18 +9,18 @@ export const useReportStore = defineStore('report', () => {
   const selectedYear = ref(Number(localStorage.getItem('report-year')) || new Date().getFullYear());
   const selectedMonth = ref(Number(localStorage.getItem('report-month')) || new Date().getMonth() + 1);
   
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const reportCache = ref<any>(null); 
   const loading = ref(false);
 
   const formattedMonth = computed(() => {
-    if (!selectedMonth.value) return String(selectedYear.value); // Just "2026"
+    if (!selectedMonth.value) return String(selectedYear.value);
     
     const monthStr = String(selectedMonth.value).padStart(2, '0');
-    return `${selectedYear.value}-${monthStr}`; // "2026-02"
+    return `${selectedYear.value}-${monthStr}`;
   });
 
   const fetchAllReports = async () => {
-    // Wait for kanbanStore if it hasn't fetched clients yet
     if (kanbanStore.clients.length === 0) {
       await kanbanStore.fetchClients();
     }
@@ -44,7 +44,6 @@ export const useReportStore = defineStore('report', () => {
     }
   };
 
-  // Watch for date changes to refresh the cache automatically
   watch([selectedYear, selectedMonth], async () => {
     localStorage.setItem('report-year', String(selectedYear.value));
     localStorage.setItem('report-month', String(selectedMonth.value));
