@@ -171,7 +171,6 @@ const $q = useQuasar();
 const router = useRouter();
 const authStore = useAuthStore();
 const kanbanStore = useKanbanStore();
-const clients = computed(() => kanbanStore.clients);
 const loading = ref(false);
 const showEditDialog = ref(false);
 const editingClient = ref<Client>({} as Client);
@@ -185,8 +184,11 @@ const searchType = ref('nome');
 const filteredClients = computed(() => {
   if (!search.value) return kanbanStore.clients;
   const term = search.value.toLowerCase();
-  return kanbanStore.clients.filter((c: any) => {
-    const val = c[searchType.value];
+  return kanbanStore.clients.filter((c) => {
+    
+    const key = searchType.value as keyof typeof c;
+    const val = c[key];
+    
     return typeof val === 'string' && val.toLowerCase().includes(term);
   });
 });
@@ -213,8 +215,12 @@ const fetchClients = async () => {
   }
 };
 
-const onRowClick = (evt: Event, row: Client) => {
-  router.push(`/kanban/${row.id}`);
+const onRowClick = async (evt: Event, row: Client) => {
+  try {
+    await router.push(`/kanban/${row.id}`);
+  } catch (error) {
+    console.error('Navigation error:', error);
+  }
 };
 
 const openCreateDialog = () => {
@@ -271,16 +277,17 @@ const confirmDelete = (client: Client) => {
     message: `Are you sure you want to delete ${client.nome}?`,
     cancel: true,
     persistent: true
-  }).onOk(async () => {
-    try {
-      // Using destroyMany as per controller definition, passing array of IDs
-      await api.delete('/clients', { data: { ids: [client.id] } });
-      $q.notify({ type: 'positive', message: 'Client deleted' });
-      await kanbanStore.fetchClients(true);
-    } catch (error) {
-      console.error(error);
-      $q.notify({ type: 'negative', message: 'Failed to delete client' });
-    }
+  }).onOk(() => {
+    void async function deleteClient() {
+      try {
+        await api.delete(`/clients/${client.id}`);
+        $q.notify({ type: 'positive', message: 'Client deleted successfully' });
+        await kanbanStore.fetchClients(true);
+      } catch (error) {
+        console.error(error);
+        $q.notify({ type: 'negative', message: 'Failed to delete client' });
+      }
+    }();
   });
 };
 

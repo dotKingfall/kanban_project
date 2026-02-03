@@ -12,10 +12,6 @@
       </div>
 
       <!-- Kanban Board Area -->
-      <div class="row no-wrap q-gutter-x-md full-height items-start scroll-x-auto">
-        <div
-          v-for="col in localColumns"
-          :key="col.id"
       <draggable
         v-model="localColumns"
         item-key="id"
@@ -29,17 +25,11 @@
           <div
           class="kanban-column column no-wrap rounded-borders"
           :class="{ 'is-hidden': col.is_hidden, 'bg-grey-2': !col.is_hidden, 'bg-grey-3': col.is_hidden }"
-          @drop="onDrop($event, col)"
-          @dragover.prevent
-          @dragenter.prevent
-        >
           >
           <!-- Column Header -->
           <div
             class="column-header row items-center justify-between q-pa-sm bg-grey-3 rounded-borders"
             :class="{ 'cursor-move': !col.is_fixed }"
-            :draggable="!col.is_fixed"
-            @dragstart="onDragStart($event, col)"
           >
             <div class="row items-center no-wrap full-width" :class="{ 'column justify-center q-py-md': col.is_hidden }">
               
@@ -81,7 +71,6 @@
             </div>
           </div>
         </div>
-      </div>
         </template>
       </draggable>
     </div>
@@ -93,7 +82,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { useRouter } from 'vue-router';
 import { api } from 'boot/axios';
@@ -109,8 +98,6 @@ const kanbanStore = useKanbanStore();
 const client = ref<ClientWithDemands | null>(null);
 const loading = ref(true);
 const localColumns = ref<KanbanColumn[]>([]);
-
-const draggedCol = ref<KanbanColumn | null>(null);
 
 onMounted(async () => {
   try {
@@ -159,49 +146,14 @@ const saveColumns = async () => {
   }
 };
 
-const togglePin = (col: KanbanColumn) => {
+const togglePin = async (col: KanbanColumn) => {
   col.is_fixed = !col.is_fixed;
-  saveColumns();
+  await saveColumns();
 };
 
-const toggleHide = (col: KanbanColumn) => {
+const toggleHide = async (col: KanbanColumn) => {
   col.is_hidden = !col.is_hidden;
-  saveColumns();
-};
-
-// Drag and Drop Logic
-const onDragStart = (evt: DragEvent, col: KanbanColumn) => {
-  if (col.is_fixed) {
-    evt.preventDefault();
-    return;
-  }
-  draggedCol.value = col;
-  if (evt.dataTransfer) {
-    evt.dataTransfer.effectAllowed = 'move';
-    evt.dataTransfer.dropEffect = 'move';
-
-    // Set drag image to the whole column (parent of header)
-    const target = evt.target as HTMLElement;
-    const columnEl = target.closest('.kanban-column');
-    if (columnEl) {
-      evt.dataTransfer.setDragImage(columnEl, 0, 0);
-    }
-  }
-};
-
-const onDrop = (evt: DragEvent, targetCol: KanbanColumn) => {
-  if (!draggedCol.value || draggedCol.value.id === targetCol.id) return;
-  
-  const oldIndex = localColumns.value.findIndex(c => c.id === draggedCol.value?.id);
-  const newIndex = localColumns.value.findIndex(c => c.id === targetCol.id);
-
-  // Remove from old position
-  localColumns.value.splice(oldIndex, 1);
-  // Insert at new position
-  localColumns.value.splice(newIndex, 0, draggedCol.value);
-
-  draggedCol.value = null;
-  saveColumns();
+  await saveColumns();
 };
 </script>
 
