@@ -117,6 +117,7 @@ const clientData = computed(() => {
   if (!reportStore.reportCache) return null;
   const clientId = Number(router.currentRoute.value.query.ids);
   const clientObj = kanbanStore.getClientById(clientId.toString());
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const demands = reportStore.reportCache.demands.filter((d: any) => d.cliente === clientId);
   
   const statusSummary: Record<string, number> = {};
@@ -129,6 +130,7 @@ const clientData = computed(() => {
   let totalEstimated = 0;
   let totalSpent = 0;
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   demands.forEach((d: any) => {
     if (d.status in statusSummary) statusSummary[d.status] = (statusSummary[d.status] ?? 0) + 1;;
     totalEstimated += Number(d.tempo_estimado || 0);
@@ -139,6 +141,7 @@ const clientData = computed(() => {
     demands,
     stats: {
       total: demands.length,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       billed: demands.filter((d: any) => d.cobrada_do_cliente).length,
       by_status: statusSummary,
       totalEstimated,

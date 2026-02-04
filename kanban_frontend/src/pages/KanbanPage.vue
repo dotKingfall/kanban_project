@@ -207,6 +207,15 @@ onMounted(async () => {
     if (client.value && client.value.kanban_columns) {
       localColumns.value = [...client.value.kanban_columns].sort((a, b) => a.position - b.position);
     }
+
+    const demandIdToEdit = route.query.demand_id;
+    if (demandIdToEdit && client.value?.demands) {
+      const targetDemand = client.value.demands.find(d => d.id === Number(demandIdToEdit));
+      if (targetDemand) {
+        openEditDemandDialog(targetDemand);
+      }
+    }
+
   } catch (error) {
     console.error('Failed to fetch client', error);
   } finally {

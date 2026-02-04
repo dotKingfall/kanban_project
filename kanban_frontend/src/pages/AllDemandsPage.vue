@@ -2,7 +2,7 @@
   <q-page class="q-pa-md column no-wrap overflow-hidden" style="height: 100vh;">
     
     <q-table
-      title="All Demands"
+      title="Demandas Globais"
       :rows="filteredDemands"
       :columns="columns"
       row-key="id"
@@ -15,10 +15,10 @@
     >
       <template v-slot:top-left>
         <div class="column">
-          <div class="text-h6">All Demands</div>
+          <div class="text-h6">Demandas Globai</div>
           <div class="row items-center q-gutter-x-xs">
             <div style="width: 12px; height: 12px; border-radius: 2px;" class="bg-orange-2"></div>
-            <div class="text-caption text-grey-8">= Returned from test</div>
+            <div class="text-caption text-grey-8">= Flag retornou</div>
           </div>
         </div>
       </template>
@@ -31,12 +31,12 @@
             dense outlined options-dense emit-value map-options
             style="min-width: 120px"
           />
-          <q-input v-model="search" dense outlined placeholder="Search" clearable>
+          <q-input v-model="search" dense outlined placeholder="Buscar" clearable>
             <template v-slot:append><q-icon name="search" /></template>
           </q-input>
 
           <q-btn flat round color="primary" icon="refresh" @click="() => loadData(true)">
-            <q-tooltip>Refresh</q-tooltip>
+            <q-tooltip>Recarregar</q-tooltip>
           </q-btn>
         </div>
       </template>
@@ -87,15 +87,15 @@ const kanbanStore = useKanbanStore();
 const loading = ref(false);
 const search = ref('');
 const searchType = ref('titulo');
-const searchOptions = [{ label: 'Title', value: 'titulo' }];
+const searchOptions = [{ label: 'Título', value: 'titulo' }];
 
 const columns: QTableColumn[] = [
-  { name: 'titulo', label: 'Title', field: 'titulo', sortable: true, align: 'left' },
-  { name: 'client', label: 'Client', field: 'cliente', sortable: true, align: 'left' },
-  { name: 'priority', label: 'Priority', field: (row: Demand) => row.priority_table_id, sortable: true, align: 'center' },
+  { name: 'titulo', label: 'Título', field: 'titulo', sortable: true, align: 'left' },
+  { name: 'client', label: 'Cliente', field: 'cliente', sortable: true, align: 'left' },
+  { name: 'priority', label: 'Prioridade', field: (row: Demand) => row.priority_table_id, sortable: true, align: 'center' },
   { name: 'status', label: 'Status', field: 'status', sortable: true, align: 'center' },
-  { name: 'responsavel', label: 'Responsible', field: 'responsavel', sortable: true, align: 'left' },
-  { name: 'tempo_estimado', label: 'Est. Time', field: 'tempo_estimado', sortable: true, align: 'right' },
+  { name: 'responsavel', label: 'Responsável', field: 'responsavel', sortable: true, align: 'left' },
+  { name: 'tempo_estimado', label: 'Tempo Estimado', field: 'tempo_estimado', sortable: true, align: 'right' },
 ];
 
 const filteredDemands = computed(() => {
@@ -123,7 +123,12 @@ const loadData = async (force = false) => {
 };
 
 const onRowClick = async (evt: Event, row: Demand) => {
-  await router.push(`/kanban/${row.cliente}`);
+  await router.push(
+    {
+      path: `/kanban/${row.cliente}`,
+      query: { demand_id: row.id.toString() },
+    }
+  );
 };
 
 onMounted(async () => {
