@@ -28,7 +28,7 @@ class ClientController extends Controller
             $client->setRelation('kanban_columns', $columns->get($client->id, []));
         }
 
-        return $clients;
+        return $clients->sortByDesc('id')->values();
     }
 
     public function show(Request $request, $id)
