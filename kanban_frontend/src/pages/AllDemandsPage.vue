@@ -15,7 +15,7 @@
     >
       <template v-slot:top-left>
         <div class="column">
-          <div class="text-h6">Demandas Globai</div>
+          <div class="text-h6">Demandas Globais</div>
           <div class="row items-center q-gutter-x-xs">
             <div style="width: 12px; height: 12px; border-radius: 2px;" class="bg-orange-2"></div>
             <div class="text-caption text-grey-8">= Flag retornou</div>
