@@ -36,37 +36,37 @@
     </div>
 
     <div v-else class="flex flex-center absolute-center text-negative">
-      Client not found.
+      Nenhum cliente encontrado.
     </div>
 
     <!-- Create Demand Dialog -->
     <q-dialog v-model="showCreateDemandDialog">
       <q-card style="min-width: 500px">
         <q-card-section>
-          <div class="text-h6">{{ newDemand.id ? 'Edit Demand' : 'New Demand' }}</div>
+          <div class="text-h6">{{ newDemand.id ? 'Editar Demanda' : 'Nova Demanda' }}</div>
         </q-card-section>
 
         <q-card-section class="q-pt-none">
           <q-form @submit="saveNewDemand" class="q-gutter-md">
             <q-input
               v-model="newDemand.titulo"
-              label="Title"
-              :rules="[val => !!val || 'Title is required']"
+              label="Título"
+              :rules="[val => !!val || 'Título é obrigatório']"
               outlined
               dense
             />
             <q-select
               v-model="newDemand.status"
               :options="statusOptions"
-              label="Status / Column"
-              :rules="[val => !!val || 'Status is required']"
+              label="Status"
+              :rules="[val => !!val || 'Status é obrigatório']"
               outlined
               dense
             />
             <q-input
               v-model="newDemand.responsavel"
-              label="Responsible"
-              :rules="[val => !!val || 'Responsible is required']"
+              label="Responsável"
+              :rules="[val => !!val || 'Responsável é obrigatório']"
               outlined
               dense />
             
@@ -75,29 +75,30 @@
               :options="priorityOptions"
               option-label="name"
               option-value="id"
-              label="Priority"
+              label="Prioridade"
               outlined
-              :rules="[val => val !== null && val !== undefined || 'Priority is required']"
+              :rules="[val => val !== null && val !== undefined || 'Prioridade é obrigatória']"
               dense
               emit-value
               map-options
             />
+
             <q-select
               v-model="newDemand.department_table_id"
               :options="departmentOptions"
               option-label="name"
               option-value="id"
-              label="Department"
+              label="Setor"
               outlined
               dense
               emit-value
               map-options
             />
             
-            <q-input v-model="newDemand.quem_deve_testar" label="Tester" outlined dense />
+            <q-input v-model="newDemand.quem_deve_testar" label="Testador" outlined dense />
             <q-input
               v-model="newDemand.descricao_detalhada"
-              label="Detailed Description"
+              label="Descrição Detalhada"
               type="textarea"
               outlined
               dense
@@ -106,7 +107,7 @@
             <!-- Attachments -->
             <div class="q-mt-md">
               <div class="row items-center justify-between q-mb-xs">
-                <div class="text-subtitle2">Links & Anexos</div>
+                <div class="text-subtitle2">Links</div>
                 <q-btn 
                   flat round dense 
                   color="primary" 
@@ -152,14 +153,14 @@
             </div>
 
             <div class="row q-gutter-sm items-center">
-              <q-input v-model.number="newDemand.tempo_estimado" type="number" label="Estimated Time (h)" outlined dense style="width: 150px" />
-              <q-toggle v-model="newDemand.cobrada_do_cliente" label="Bill to client" />
-              <q-toggle v-model="newDemand.flag_returned" label="Returned" color="orange" />
+              <q-input v-model.number="newDemand.tempo_estimado" type="number" label="Tempo Estimado (h)" outlined dense style="width: 150px" />
+              <q-toggle v-model="newDemand.cobrada_do_cliente" label="Cobrado do cliente" />
+              <q-toggle v-model="newDemand.flag_returned" label="Retornado" color="orange" />
             </div>
 
             <div align="right" class="q-mt-md">
-              <q-btn flat label="Cancel" color="primary" v-close-popup />
-              <q-btn label="Save" type="submit" color="primary" />
+              <q-btn flat label="Cancelar" color="primary" v-close-popup />
+              <q-btn label="Salvar" type="submit" color="primary" />
             </div>
           </q-form>
         </q-card-section>
@@ -176,11 +177,8 @@ import { api } from 'boot/axios';
 import { useQuasar } from 'quasar';
 import draggable from 'vuedraggable';
 import { useKanbanStore, type ClientWithDemands } from 'src/stores/kanban';
-import {
-  type KanbanColumn,
-  type Demand,
-  makeEmptyDemand,
-} from 'src/components/models';
+import type { KanbanColumn, Demand } from 'src/components/models';
+import { makeEmptyDemand } from 'src/components/models';
 import KanbanColumnComponent from 'src/components/KanbanColumn.vue';
 
 const $q = useQuasar();
@@ -198,8 +196,6 @@ const departmentOptions = computed(() => kanbanStore.departments);
 
 onMounted(async () => {
   try {
-    // Ensure we have data. If user refreshed page directly here, this will fetch it.
-    // If coming from Dashboard, this uses the cache immediately.
     await Promise.all([
       kanbanStore.fetchClients(),
       kanbanStore.fetchLookups()
@@ -209,9 +205,17 @@ onMounted(async () => {
     client.value = foundClient || null;
     
     if (client.value && client.value.kanban_columns) {
-      // Sort columns by position initially
       localColumns.value = [...client.value.kanban_columns].sort((a, b) => a.position - b.position);
     }
+
+    const demandIdToEdit = route.query.demand_id;
+    if (demandIdToEdit && client.value?.demands) {
+      const targetDemand = client.value.demands.find(d => d.id === Number(demandIdToEdit));
+      if (targetDemand) {
+        openEditDemandDialog(targetDemand);
+      }
+    }
+
   } catch (error) {
     console.error('Failed to fetch client', error);
   } finally {
@@ -242,7 +246,6 @@ watch(() => newDemand.value?.status, (newStatus) => {
 const openCreateDemandDialog = (column: KanbanColumn) => {
   if (!client.value) return;
 
-  // Calculate the next position in the column (0-indexed).
   const demandsInColumn = getDemandsForColumn(column.id);
   const newPosition = demandsInColumn.length;
 
@@ -255,8 +258,6 @@ const openCreateDemandDialog = (column: KanbanColumn) => {
 
 const openEditDemandDialog = (demand: Demand) => {
   newDemand.value = { ...demand };
-  // Create a copy of the attachments array to avoid modifying the original object
-  // if the user cancels the edit.
   if (newDemand.value.anexos) {
     newDemand.value.anexos = [...newDemand.value.anexos];
   }
@@ -268,17 +269,14 @@ const addLinkRow = () => {
   if (!newDemand.value.anexos) {
     newDemand.value.anexos = [];
   }
-  // We use url property to match your JSON structure
+
   newDemand.value.anexos.push({ name: 'Link', url: '' });
 };
 
 const openLink = (url: string) => {
   if (!url || url.trim() === '') return;
   
-  // Ensure the URL has a protocol
   const target = url.startsWith('http') ? url : `https://${url}`;
-  
-  // Securely open in a new tab
   window.open(target, '_blank', 'noopener,noreferrer');
 };
 
@@ -290,21 +288,17 @@ const removeExistingAttachment = (index: number) => {
 
 const saveNewDemand = async () => {
   if (!newDemand.value.titulo) {
-    $q.notify({ type: 'negative', message: 'Title is required' });
+    $q.notify({ type: 'negative', message: 'Título é obrigatório' });
     return;
   }
 
-  // We no longer need FormData since we are just sending text/links
-  // Just send the newDemand object directly
   const payload = {
     ...newDemand.value,
-    // Ensure anexos is sent as an array (Laravel will handle the JSON cast)
     anexos: newDemand.value.anexos || [] 
   };
 
   try {
     if (newDemand.value.id) {
-      // Update existing
       const response = await api.patch(`/demands/${newDemand.value.id}`, payload);
       const updatedDemand: Demand = response.data;
 
@@ -314,30 +308,40 @@ const saveNewDemand = async () => {
           client.value.demands[index] = updatedDemand;
         }
       }
-      $q.notify({ type: 'positive', message: 'Demand updated successfully' });
+      $q.notify({ type: 'positive', message: 'Demanda atualizada com sucesso' });
     } else {
-      // Create new
       const response = await api.post('/demands', payload);
       const createdDemand: Demand = response.data;
 
-      if (client.value?.demands) {
+      if (client.value) {
+        if (!client.value.demands) {
+          client.value.demands = [];
+        }
+
         client.value.demands.push(createdDemand);
       }
-      $q.notify({ type: 'positive', message: 'Demand created successfully' });
+      $q.notify({ type: 'positive', message: 'Demanda criada com sucesso' });
     }
 
     showCreateDemandDialog.value = false;
   } catch (error) {
     console.error('Failed to save demand', error);
-    $q.notify({ type: 'negative', message: 'Failed to save demand' });
+    $q.notify({ type: 'negative', message: 'Erro ao salvar demanda' });
   }
 };
 
 const confirmDeleteDemand = (demand: Demand) => {
   $q.dialog({
-    title: 'Confirm',
-    message: `Are you sure you want to delete "${demand.titulo}"?`,
-    cancel: true,
+    title: 'Confirmar',
+    message: `Tem certeza que deseja excluir "${demand.titulo}"?`,
+    cancel: {
+      label: 'Cancelar',
+      color: 'negative'
+    },
+    ok: {
+      label: 'Excluir',
+      color: 'primary'
+    },
     persistent: true
   }).onOk(() => {
     void(async () => {
@@ -346,10 +350,10 @@ const confirmDeleteDemand = (demand: Demand) => {
       if (client.value?.demands) {
         client.value.demands = client.value.demands.filter(d => d.id !== demand.id);
       }
-      $q.notify({ type: 'positive', message: 'Demand deleted' });
+      $q.notify({ type: 'positive', message: 'Demanda excluída com sucesso' });
     } catch (error) {
       console.error('Failed to delete demand:', error);
-      $q.notify({ type: 'negative', message: 'Failed to delete demand' });
+      $q.notify({ type: 'negative', message: 'Erro ao excluir demanda' });
     }
     })();
   });

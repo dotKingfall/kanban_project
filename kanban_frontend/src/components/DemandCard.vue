@@ -18,11 +18,11 @@
             <q-list style="min-width: 100px">
               <q-item clickable v-close-popup @click="$emit('edit', demand)">
                 <q-item-section avatar><q-icon name="edit" size="xs" /></q-item-section>
-                <q-item-section>Edit</q-item-section>
+                <q-item-section>Editar</q-item-section>
               </q-item>
               <q-item clickable v-close-popup @click="$emit('delete', demand)" class="text-negative">
                 <q-item-section avatar><q-icon name="delete" size="xs" /></q-item-section>
-                <q-item-section>Delete</q-item-section>
+                <q-item-section>Excluir</q-item-section>
               </q-item>
             </q-list>
           </q-menu>
@@ -36,7 +36,7 @@
       <q-chip
         v-if="props.demand.prioridade"
         :label="props.demand.prioridade"
-        color="primary"
+        :color="getPriorityColor"
         text-color="white"
         size="sm"
         icon="priority_high"
@@ -50,7 +50,7 @@
       <q-chip
         v-if="props.demand.department_obj"
         :label="props.demand.department_obj.name"
-        color="secondary"
+        color="primary"
         text-color="white"
         size="sm"
         icon="groups"
@@ -63,7 +63,7 @@
       <q-chip
         v-if="props.demand.flag_returned"
         label="Retornado"
-        color="orange"
+        color="primary"
         text-color="white"
         size="sm"
         icon="replay"
@@ -76,7 +76,7 @@
       <q-chip
         v-if="props.demand.cobrada_do_cliente"
         label="Cobrada"
-        color="green"
+        color="primary"
         text-color="white"
         size="sm"
         icon="attach_money"
@@ -160,16 +160,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, type PropType } from 'vue';
+import { ref, computed, type PropType } from 'vue';
 import type { Demand } from './models';
 
 defineEmits(['edit', 'delete']);
-
-// Helper to ensure URLs have a protocol for <a> tags
-const formatUrl = (url: string) => {
-  if (!url) return '#';
-  return url.startsWith('http') ? url : `https://${url}`;
-};
 
 const props = defineProps({
   demand: {
@@ -178,7 +172,24 @@ const props = defineProps({
   },
 });
 
+const formatUrl = (url: string) => {
+  if (!url) return '#';
+  return url.startsWith('http') ? url : `https://${url}`;
+};
+
 const isExpanded = ref(false);
+
+const getPriorityColor = computed(() => {
+  const priority = props.demand.prioridade?.toLowerCase() || '';
+  
+  switch (priority) {
+    case 'urgente': return 'negative'; // Quasar Red
+    case 'alta':    return 'orange-9'; // Deep Orange
+    case 'média':   return 'warning';  // Quasar Yellow/Amber
+    case 'baixa':   return 'positive'; // Quasar Green
+    default:        return 'grey-7';
+  }
+});
 
 </script>
 

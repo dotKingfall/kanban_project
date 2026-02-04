@@ -82,7 +82,7 @@ export interface Demand {
   descricao_detalhada?: string | null;
   responsavel?: string | null;
   quem_deve_testar?: string | null;
-  anexos?: Attachment[] | null; // JSON field
+  anexos?: Attachment[] | null; // JSON
   cobrada_do_cliente: boolean;
   flag_returned: boolean;
   tempo_estimado: number;
@@ -92,7 +92,7 @@ export interface Demand {
   setor?: string | null;
   status?: string | null;
 
-  // Foreign Keys
+  // FOREIGN KEYS
   priority_table_id?: number | null;
   department_table_id?: number | null;
   kanban_column_id: number;
@@ -100,7 +100,7 @@ export interface Demand {
   created_at?: string;
   updated_at?: string;
 
-  // Relations
+  // RELATIONS (UNUSED in forms)
   client?: Client;
   kanban_column?: KanbanColumn;
   priority_obj?: Priority;
@@ -108,7 +108,6 @@ export interface Demand {
 }
 
 
-// --- Factory Functions (For creating new objects) ---
 export function makeEmptyClient(): Omit<Client, 'id' | 'created_at' | 'updated_at'> {
   return {
     nome: '',

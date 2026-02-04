@@ -1,7 +1,7 @@
 <template>
   <q-page class="q-pa-md column no-wrap overflow-hidden" style="height: 100vh;">
     <q-table
-      title="Clients"
+      title="Clientes"
       :rows="filteredClients"
       :columns="columns"
       row-key="id"
@@ -28,7 +28,7 @@
           icon="refresh"
           @click="fetchClients"
         >
-          <q-tooltip>Refresh</q-tooltip>
+          <q-tooltip>Recarregar</q-tooltip>
         </q-btn>
 
         <q-btn
@@ -38,7 +38,7 @@
           icon="add"
           @click="openCreateDialog"
         >
-          <q-tooltip>Create new</q-tooltip>
+          <q-tooltip>Criar Novo</q-tooltip>
         </q-btn>
         </div>
       </template>
@@ -48,29 +48,29 @@
           <div class="ellipsis">
             {{ props.value }}
           </div>
-          <q-tooltip v-if="props.value">Click to view full observation</q-tooltip>
+          <q-tooltip v-if="props.value">Clique para ver a observação completa.</q-tooltip>
         </q-td>
       </template>
 
       <template v-slot:body-cell-avisar_por_email="props">
         <q-td :props="props">
-          <q-icon :name="props.value ? 'check_circle' : 'cancel'" :color="props.value ? 'positive' : 'grey'" size="sm" />
+          <q-icon :name="props.value ? 'check_circle' : 'cancel'" :color="props.value ? 'primary' : 'grey'" size="sm" />
         </q-td>
       </template>
 
       <template v-slot:body-cell-avisar_por_whatsapp="props">
         <q-td :props="props">
-          <q-icon :name="props.value ? 'check_circle' : 'cancel'" :color="props.value ? 'positive' : 'grey'" size="sm" />
+          <q-icon :name="props.value ? 'check_circle' : 'cancel'" :color="props.value ? 'primary' : 'grey'" size="sm" />
         </q-td>
       </template>
 
       <template v-slot:body-cell-actions="props">
         <q-td :props="props" align="right">
           <q-btn flat round color="primary" icon="edit" size="sm" @click.stop="openEditDialog(props.row)">
-            <q-tooltip>Edit</q-tooltip>
+            <q-tooltip>Editar</q-tooltip>
           </q-btn>
           <q-btn flat round color="negative" icon="delete" size="sm" @click.stop="confirmDelete(props.row)">
-            <q-tooltip>Delete</q-tooltip>
+            <q-tooltip>Excluir</q-tooltip>
           </q-btn>
         </q-td>
       </template>
@@ -80,15 +80,15 @@
     <q-dialog v-model="showEditDialog">
       <q-card style="min-width: 500px">
         <q-card-section>
-          <div class="text-h6">{{ editingClient.id ? 'Edit Client' : 'New Client' }}</div>
+          <div class="text-h6">{{ editingClient.id ? 'Editar Cliente' : 'Novo Cliente' }}</div>
         </q-card-section>
 
         <q-card-section class="q-pt-none">
           <q-form @submit="saveClient" class="q-gutter-md">
             <q-input
               v-model="editingClient.nome"
-              label="Name"
-              :rules="[val => !!val || 'Name is required']"
+              label="Nome"
+              :rules="[val => !!val || 'Insira o nome']"
               outlined
               dense
             />
@@ -101,7 +101,7 @@
                   type="email" 
                   outlined 
                   dense 
-                  :rules="[val => !!val || !!editingClient.whatsapp || 'At least one contact method is required']"
+                  :rules="[val => !!val || !!editingClient.whatsapp || 'Email ou WhatsApp é obrigatório']"
                 />
               </div>
               <div class="col-12 col-md-6">
@@ -110,14 +110,14 @@
                   label="WhatsApp" 
                   outlined 
                   dense 
-                  :rules="[val => !!val || !!editingClient.email || 'At least one contact method is required']"
+                  :rules="[val => !!val || !!editingClient.email || 'Email ou WhatsApp é obrigatório']"
                 />
               </div>
             </div>
 
             <q-input
               v-model="editingClient.observacao"
-              label="Observation"
+              label="Observações"
               type="textarea"
               outlined
               dense
@@ -126,15 +126,15 @@
 
             <div class="row q-col-gutter-md">
               <div class="col-6">
-                <q-toggle v-model="editingClient.avisar_por_email" label="Notify by Email" />
+                <q-toggle v-model="editingClient.avisar_por_email" label="Notificar por Email" />
               </div>
               <div class="col-6">
-                <q-toggle v-model="editingClient.avisar_por_whatsapp" label="Notify by WhatsApp" />
+                <q-toggle v-model="editingClient.avisar_por_whatsapp" label="Notificar por WhatsApp" />
               </div>
             </div>
 
             <div align="right" class="q-mt-md">
-              <q-btn flat label="Cancel" color="primary" v-close-popup />
+              <q-btn flat label="Cancelar" color="primary" v-close-popup />
               <q-btn label="Save" type="submit" color="primary" />
             </div>
           </q-form>
@@ -146,7 +146,7 @@
     <q-dialog v-model="showObservationDialog">
       <q-card style="min-width: 400px">
         <q-card-section>
-          <div class="text-h6">Observation</div>
+          <div class="text-h6">Observação</div>
         </q-card-section>
 
         <q-card-section class="q-pt-none" style="white-space: pre-wrap;">
@@ -197,13 +197,13 @@ const filteredClients = computed(() => {
 });
 
 const columns: QTableColumn[] = [
-  { name: 'nome', label: 'Name', field: 'nome', sortable: true, align: 'left' },
+  { name: 'nome', label: 'Nome', field: 'nome', sortable: true, align: 'left' },
   { name: 'email', label: 'Email', field: 'email', sortable: true, align: 'left' },
-  { name: 'observacao', label: 'Observation', field: 'observacao', align: 'left' },
+  { name: 'observacao', label: 'Observação', field: 'observacao', align: 'left' },
   { name: 'whatsapp', label: 'WhatsApp', field: 'whatsapp', align: 'left' },
-  { name: 'avisar_por_email', label: 'Email Notify', field: 'avisar_por_email', align: 'center' },
-  { name: 'avisar_por_whatsapp', label: 'WA Notify', field: 'avisar_por_whatsapp', align: 'center' },
-  { name: 'actions', label: 'Actions', field: 'actions', align: 'right' },
+  { name: 'avisar_por_email', label: 'Notificar por Email', field: 'avisar_por_email', align: 'center' },
+  { name: 'avisar_por_whatsapp', label: 'Notificar por WhatsApp', field: 'avisar_por_whatsapp', align: 'center' },
+  { name: 'actions', label: 'Ações', field: 'actions', align: 'right' },
 ];
 
 const fetchClients = async () => {
@@ -212,7 +212,7 @@ const fetchClients = async () => {
     await kanbanStore.fetchClients(true);
   } catch (error) {
     console.error(error);
-    $q.notify({ type: 'negative', message: 'Failed to load clients' });
+    $q.notify({ type: 'negative', message: 'Não foi possível carregar clientes' });
   } finally {
     loading.value = false;
   }
@@ -253,7 +253,7 @@ const openEditDialog = (client: Client) => {
 };
 
 const saveClient = async () => {
-  if (isSaving.value) return; // Prevent double submission
+  if (isSaving.value) return;
   isSaving.value = true;
 
   try {
@@ -270,25 +270,32 @@ const saveClient = async () => {
     console.error(error);
     $q.notify({ type: 'negative', message: 'Failed to save client' });
   } finally {
-    isSaving.value = false; // Reset the saving state
+    isSaving.value = false;
   }
 };
 
 const confirmDelete = (client: Client) => {
   $q.dialog({
-    title: 'Confirm Deletion',
-    message: `Are you sure you want to delete ${client.nome}?`,
-    cancel: true,
+    title: 'Confirmar Exclusão',
+    message: `Tem certeza que deseja excluir o cliente ${client.nome}?`,
+    cancel: {
+      label: 'Cancelar',
+      color: 'negative',
+    },
+    ok: {
+      label: 'Excluir',
+      color: 'primary',
+    },
     persistent: true
   }).onOk(() => {
     void async function deleteClient() {
       try {
         await api.delete(`/clients/${client.id}`);
-        $q.notify({ type: 'positive', message: 'Client deleted successfully' });
+        $q.notify({ type: 'positive', message: 'Cliente excluído com sucesso' });
         await kanbanStore.fetchClients(true);
       } catch (error) {
         console.error(error);
-        $q.notify({ type: 'negative', message: 'Failed to delete client' });
+        $q.notify({ type: 'negative', message: 'Falha ao excluir cliente' });
       }
     }();
   });

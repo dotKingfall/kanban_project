@@ -16,7 +16,7 @@
       @update:model-value="$emit('update:search', $event as string | null)"
       dense
       outlined
-      placeholder="Search"
+      placeholder="Buscar"
       clearable
     >
       <template v-slot:append>
@@ -38,7 +38,7 @@ defineEmits<{
 }>();
 
 const searchOptions = [
-  { label: 'Name', value: 'nome' },
+  { label: 'Nome', value: 'nome' },
   { label: 'Email', value: 'email' }
 ];
 </script>

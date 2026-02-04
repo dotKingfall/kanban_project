@@ -31,7 +31,7 @@ export const useKanbanStore = defineStore('kanban', {
           });
         }
       });
-      // Sort by priority (lower is higher)
+      // SORT BY PRIORITY (LOWEST NUMBER FIRST)
       return allDemands.sort((a, b) => (a.priority_table_id || 999) - (b.priority_table_id || 999));
     }
   },
@@ -68,7 +68,6 @@ export const useKanbanStore = defineStore('kanban', {
     },
 
     getClientById(id: number | string) {
-      // Convert id to number for comparison
       const numericId = Number(id);
       return this.clients.find(c => c.id === numericId);
     }

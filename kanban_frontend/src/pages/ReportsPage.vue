@@ -1,14 +1,14 @@
 <template>
   <q-page class="q-pa-md column no-wrap overflow-hidden" style="height: 100vh;">
     <div class="row items-center q-gutter-md q-mb-md">
-      <div class="text-h5">Reports</div>
+      <div class="text-h5">Relatórios</div>
       
       <q-space />
 
       <q-select
         v-model="reportStore.selectedYear"
         :options="yearOptions"
-        label="Year"
+        label="Ano"
         outlined
         dense
         :disable="reportStore.loading"
@@ -18,7 +18,7 @@
       <q-select
         v-model="reportStore.selectedMonth"
         :options="monthOptions"
-        label="Month"
+        label="Mês"
         outlined
         dense
         emit-value
@@ -30,7 +30,7 @@
 
     <div class="col relative-position">
       <q-table
-        title="Client Reports"
+        title="Relatório de Clientes"
         :rows="filteredClients"
         :columns="columns"
         row-key="id"
@@ -90,18 +90,18 @@ const yearOptions = Array.from({ length: 101 }, (_, i) => currentYear - i);
 
 const monthOptions = [
   { label: 'Any', value: null },
-  { label: 'January', value: 1 }, { label: 'February', value: 2 },
-  { label: 'March', value: 3 }, { label: 'April', value: 4 },
-  { label: 'May', value: 5 }, { label: 'June', value: 6 },
-  { label: 'July', value: 7 }, { label: 'August', value: 8 },
-  { label: 'September', value: 9 }, { label: 'October', value: 10 },
-  { label: 'November', value: 11 }, { label: 'December', value: 12 }
+  { label: 'Janeiro', value: 1 }, { label: 'Fevereiro', value: 2 },
+  { label: 'Março', value: 3 }, { label: 'Abril', value: 4 },
+  { label: 'Maio', value: 5 }, { label: 'Junho', value: 6 },
+  { label: 'Julho', value: 7 }, { label: 'Agosto', value: 8 },
+  { label: 'Setembro', value: 9 }, { label: 'Outubro', value: 10 },
+  { label: 'Novembro', value: 11 }, { label: 'Dezembro', value: 12 }
 ];
 
 const columns: QTableColumn[] = [
-  { name: 'nome', label: 'Name', field: 'nome', sortable: true, align: 'left' },
+  { name: 'nome', label: 'Nome', field: 'nome', sortable: true, align: 'left' },
   { name: 'email', label: 'Email', field: 'email', sortable: true, align: 'left' },
-  { name: 'observacao', label: 'Observation', field: 'observacao', align: 'left' },
+  { name: 'observacao', label: 'Observação', field: 'observacao', align: 'left' },
 ];
 
 const filteredClients = computed(() => {
@@ -114,9 +114,8 @@ const filteredClients = computed(() => {
   });
 });
 
-const onRowClick = (evt: Event, row: Client) => {
-  // Navigation is now safe because the global cache is handled by the store
-  router.push({
+const onRowClick = async (evt: Event, row: Client) => {
+  await router.push({
     path: '/full-reports',
     query: { 
       ids: [row.id], 
@@ -126,13 +125,12 @@ const onRowClick = (evt: Event, row: Client) => {
 };
 
 onMounted(async () => {
-  // Ensure clients are loaded, then fetch initial report cache
   if (kanbanStore.clients.length === 0) {
     await kanbanStore.fetchClients();
   }
   
   if (!reportStore.reportCache) {
-    reportStore.fetchAllReports();
+    await reportStore.fetchAllReports();
   }
 });
 </script>
